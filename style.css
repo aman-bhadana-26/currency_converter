@@ -336,3 +336,157 @@ form button:active {
     transform: rotate(90deg);
   }
 }
+
+/* Theme Toggle Button */
+.theme-toggle {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  transition: all 0.3s ease;
+  animation: fadeInScale 0.6s ease-out;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.theme-toggle:hover {
+  transform: scale(1.1) rotate(15deg);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+
+.theme-toggle i {
+  font-size: 1.5rem;
+  color: #667eea;
+  transition: all 0.3s ease;
+}
+
+.theme-toggle:hover i {
+  transform: scale(1.2);
+}
+
+/* Dark Theme Styles */
+body.dark-theme {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+body.dark-theme::before {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+body.dark-theme::after {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+body.dark-theme .theme-toggle {
+  background: rgba(30, 30, 46, 0.95);
+  border-color: rgba(102, 126, 234, 0.3);
+}
+
+body.dark-theme .theme-toggle i {
+  color: #ffd700;
+}
+
+body.dark-theme .container {
+  background: rgba(30, 30, 46, 0.95);
+  border-color: rgba(102, 126, 234, 0.2);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-theme .container h2 {
+  background: linear-gradient(135deg, #8b9cff 0%, #9d7fd5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+body.dark-theme .amount p,
+body.dark-theme .from p,
+body.dark-theme .to p {
+  color: #e0e0e0;
+}
+
+body.dark-theme form input {
+  background: rgba(40, 40, 58, 0.8);
+  border-color: rgba(102, 126, 234, 0.3);
+  color: #e0e0e0;
+}
+
+body.dark-theme form input:focus {
+  background: rgba(50, 50, 70, 0.9);
+  border-color: #8b9cff;
+  box-shadow: 0 5px 15px rgba(139, 156, 255, 0.3);
+}
+
+body.dark-theme .select-container {
+  background: rgba(40, 40, 58, 0.8);
+  border-color: rgba(102, 126, 234, 0.3);
+}
+
+body.dark-theme .select-container:hover {
+  background: rgba(50, 50, 70, 0.9);
+  border-color: #8b9cff;
+  box-shadow: 0 5px 15px rgba(139, 156, 255, 0.3);
+}
+
+body.dark-theme .select-container select {
+  color: #e0e0e0;
+}
+
+body.dark-theme .dropdown i {
+  color: #8b9cff;
+}
+
+body.dark-theme .dropdown i:hover {
+  color: #9d7fd5;
+}
+
+body.dark-theme .msg {
+  background: linear-gradient(135deg, #8b9cff 0%, #9d7fd5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-color: rgba(139, 156, 255, 0.1);
+}
+
+body.dark-theme form button {
+  background: linear-gradient(135deg, #8b9cff 0%, #9d7fd5 100%);
+  box-shadow: 0 10px 25px rgba(139, 156, 255, 0.3);
+}
+
+body.dark-theme form button:hover {
+  box-shadow: 0 15px 35px rgba(139, 156, 255, 0.4);
+}
+
+/* Smooth theme transition */
+body,
+.container,
+.theme-toggle,
+form input,
+.select-container,
+.amount p,
+.from p,
+.to p,
+.dropdown i,
+.select-container select {
+  transition: all 0.4s ease;
+}
