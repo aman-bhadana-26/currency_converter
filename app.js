@@ -244,3 +244,14 @@ window.addEventListener("load", () => {
     compareRates();
   }, 500);
 });
+
+// ========== Footer Navigation ==========
+
+const scrollToTopBtn = document.getElementById("scrollToTop");
+
+if (scrollToTopBtn) {
+  scrollToTopBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+}
