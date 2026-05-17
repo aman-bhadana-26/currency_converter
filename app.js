@@ -6,6 +6,61 @@ const fromCurr = document.querySelector(".from select");
 const toCurr = document.querySelector(".to select");
 const msg = document.querySelector(".msg");
 
+// ========== Navigation Menu Toggle ==========
+
+const hamburger = document.getElementById("hamburger");
+const navMenu = document.getElementById("navMenu");
+const navLinks = document.querySelectorAll(".nav-link");
+
+// Toggle mobile menu
+if (hamburger) {
+  hamburger.addEventListener("click", () => {
+    hamburger.classList.toggle("active");
+    navMenu.classList.toggle("active");
+  });
+}
+
+// Close mobile menu when clicking on a nav link
+navLinks.forEach(link => {
+  link.addEventListener("click", () => {
+    hamburger.classList.remove("active");
+    navMenu.classList.remove("active");
+  });
+});
+
+// Close mobile menu when clicking outside
+document.addEventListener("click", (e) => {
+  if (!navMenu.contains(e.target) && !hamburger.contains(e.target)) {
+    hamburger.classList.remove("active");
+    navMenu.classList.remove("active");
+  }
+});
+
+// Add active state to nav links based on scroll position
+window.addEventListener("scroll", () => {
+  const sections = document.querySelectorAll(".section, .footer");
+  const navLinks = document.querySelectorAll(".nav-link");
+
+  let current = "";
+  sections.forEach((section) => {
+    const sectionTop = section.offsetTop;
+    const sectionHeight = section.clientHeight;
+    if (window.pageYOffset >= sectionTop - 100) {
+      current = section.getAttribute("id");
+    }
+  });
+
+  navLinks.forEach((link) => {
+    link.classList.remove("active");
+    if (link.getAttribute("href") === `#${current}`) {
+      link.classList.add("active");
+    }
+  });
+});
+
+// ========== Currency Converter ==========
+
+
 for (let select of dropdowns) {
   for (currCode in countryList) {
     let newOption = document.createElement("option");
