@@ -108,6 +108,19 @@ btn.addEventListener("click", (evt) => {
   updateExchangeRate();
 });
 
+// Swapping Currency functionality
+const swapBtn = document.getElementById("swapBtn");
+if (swapBtn) {
+  swapBtn.addEventListener("click", () => {
+    const temp = fromCurr.value;
+    fromCurr.value = toCurr.value;
+    toCurr.value = temp;
+    updateFlag(fromCurr);
+    updateFlag(toCurr);
+    updateExchangeRate();
+  });
+}
+
 window.addEventListener("load", () => {
   updateExchangeRate();
 });
