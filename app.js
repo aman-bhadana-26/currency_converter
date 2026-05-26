@@ -36,8 +36,17 @@ document.addEventListener("click", (e) => {
   }
 });
 
-// Add active state to nav links based on scroll position
+// Add active state to nav links based on scroll position and trigger floating navbar scroll effects
 window.addEventListener("scroll", () => {
+  const navbar = document.querySelector(".navbar");
+  if (navbar) {
+    if (window.scrollY > 30) {
+      navbar.classList.add("scrolled");
+    } else {
+      navbar.classList.remove("scrolled");
+    }
+  }
+
   const sections = document.querySelectorAll(".section, .footer");
   const navLinks = document.querySelectorAll(".nav-link");
 
@@ -45,7 +54,7 @@ window.addEventListener("scroll", () => {
   sections.forEach((section) => {
     const sectionTop = section.offsetTop;
     const sectionHeight = section.clientHeight;
-    if (window.pageYOffset >= sectionTop - 100) {
+    if (window.pageYOffset >= sectionTop - 150) {
       current = section.getAttribute("id");
     }
   });
@@ -141,9 +150,10 @@ if (currentTheme === "dark") {
 // Toggle theme on button click
 themeToggle.addEventListener("click", () => {
   body.classList.toggle("dark-theme");
+  const isDark = body.classList.contains("dark-theme");
   
   // Update icon
-  if (body.classList.contains("dark-theme")) {
+  if (isDark) {
     themeIcon.classList.remove("fa-moon");
     themeIcon.classList.add("fa-sun");
     localStorage.setItem("theme", "dark");
@@ -152,6 +162,9 @@ themeToggle.addEventListener("click", () => {
     themeIcon.classList.add("fa-moon");
     localStorage.setItem("theme", "light");
   }
+  
+  // Shift 3D canvas rendering colors
+  update3DColors(isDark);
 });
 
 // ========== Multi-Currency Comparison Feature ==========
@@ -323,3 +336,201 @@ if (scrollToTopBtn) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
 }
+
+// ========== Interactive 3D WebGL Background (Three.js) ==========
+
+let scene, camera, renderer, starGeo, stars, shapesGroup;
+let mouseX = 0, mouseY = 0;
+const particleCount = 250;
+const velocities = [];
+
+function init3D() {
+  const canvas = document.getElementById("webgl-bg");
+  if (!canvas) return;
+
+  // Scene setup
+  scene = new THREE.Scene();
+
+  // Camera setup
+  camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
+  camera.position.z = 220;
+
+  // Renderer setup
+  renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+  // Shapes Group
+  shapesGroup = new THREE.Group();
+  scene.add(shapesGroup);
+
+  // Generate three geometric structures with custom dimensions
+  const geometries = [
+    new THREE.TorusKnotGeometry(18, 5, 120, 16),
+    new THREE.IcosahedronGeometry(20, 1),
+    new THREE.TorusGeometry(15, 4, 16, 100)
+  ];
+
+  // Starting positions scattered in depth
+  const initialPositions = [
+    { x: -110, y: 35, z: 20 },
+    { x: 110, y: -30, z: 10 },
+    { x: -75, y: -70, z: -15 }
+  ];
+
+  const isDark = document.body.classList.contains("dark-theme");
+  const shapeColors = isDark ? [0x6366f1, 0xc084fc, 0x38bdf8] : [0x818cf8, 0xf472b6, 0x7dd3fc];
+  const opacities = isDark ? [0.16, 0.11, 0.13] : [0.07, 0.04, 0.06];
+
+  geometries.forEach((geo, index) => {
+    const mat = new THREE.MeshBasicMaterial({
+      color: shapeColors[index % shapeColors.length],
+      wireframe: true,
+      transparent: true,
+      opacity: opacities[index % opacities.length]
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.set(initialPositions[index].x, initialPositions[index].y, initialPositions[index].z);
+    shapesGroup.add(mesh);
+  });
+
+  // Generate glowing circles canvas texture for particles
+  const particleCanvas = document.createElement('canvas');
+  particleCanvas.width = 16;
+  particleCanvas.height = 16;
+  const ctx = particleCanvas.getContext('2d');
+  const gradient = ctx.createRadialGradient(8, 8, 0, 8, 8, 8);
+  gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+  gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, 16, 16);
+  const particleTexture = new THREE.CanvasTexture(particleCanvas);
+
+  // Generate particle systems (Starfield)
+  const starPositions = new Float32Array(particleCount * 3);
+  for (let i = 0; i < particleCount; i++) {
+    starPositions[i * 3] = (Math.random() - 0.5) * 600;
+    starPositions[i * 3 + 1] = (Math.random() - 0.5) * 600;
+    starPositions[i * 3 + 2] = (Math.random() - 0.5) * 600;
+
+    velocities.push({
+      x: (Math.random() - 0.5) * 0.08,
+      y: (Math.random() - 0.5) * 0.08,
+      z: Math.random() * 0.08 + 0.02
+    });
+  }
+
+  starGeo = new THREE.BufferGeometry();
+  starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+
+  const starMat = new THREE.PointsMaterial({
+    color: isDark ? 0x818cf8 : 0x4f46e5,
+    size: 4.5,
+    map: particleTexture,
+    transparent: true,
+    opacity: isDark ? 0.55 : 0.22,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
+  });
+
+  stars = new THREE.Points(starGeo, starMat);
+  scene.add(stars);
+
+  // Mouse move listener for camera tracking
+  window.addEventListener("mousemove", (e) => {
+    mouseX = (e.clientX - window.innerWidth / 2) * 0.4;
+    mouseY = (e.clientY - window.innerHeight / 2) * 0.4;
+  });
+
+  // Touch listener support for mobile
+  window.addEventListener("touchmove", (e) => {
+    if (e.touches.length > 0) {
+      mouseX = (e.touches[0].clientX - window.innerWidth / 2) * 0.3;
+      mouseY = (e.touches[0].clientY - window.innerHeight / 2) * 0.3;
+    }
+  });
+
+  // Resize listener
+  window.addEventListener("resize", onWindowResize);
+
+  // Start loop
+  animate();
+}
+
+function update3DColors(isDark) {
+  if (!scene) return;
+
+  const shapeColors = isDark ? [0x6366f1, 0xc084fc, 0x38bdf8] : [0x818cf8, 0xf472b6, 0x7dd3fc];
+  const particleColor = isDark ? 0x818cf8 : 0x4f46e5;
+  const opacities = isDark ? [0.16, 0.11, 0.13] : [0.07, 0.04, 0.06];
+
+  if (shapesGroup) {
+    shapesGroup.children.forEach((mesh, index) => {
+      if (mesh.material) {
+        mesh.material.color.setHex(shapeColors[index % shapeColors.length]);
+        mesh.material.opacity = opacities[index % opacities.length];
+      }
+    });
+  }
+
+  if (stars && stars.material) {
+    stars.material.color.setHex(particleColor);
+    stars.material.opacity = isDark ? 0.55 : 0.22;
+  }
+}
+
+function onWindowResize() {
+  if (!camera || !renderer) return;
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+
+  // Animate geometries
+  if (shapesGroup) {
+    shapesGroup.children.forEach((mesh, index) => {
+      mesh.rotation.x += 0.0015 * (index % 2 === 0 ? 1 : -1);
+      mesh.rotation.y += 0.001 * (index % 2 === 0 ? -1 : 1);
+      mesh.position.y += Math.sin(Date.now() * 0.0006 + index) * 0.025;
+    });
+  }
+
+  // Animate particle cloud
+  if (starGeo) {
+    const positions = starGeo.attributes.position.array;
+    for (let i = 0; i < particleCount; i++) {
+      positions[i * 3 + 2] += velocities[i].z;
+      positions[i * 3] += velocities[i].x;
+      positions[i * 3 + 1] += velocities[i].y;
+
+      // Wrap-around boundary conditions
+      if (positions[i * 3 + 2] > 200) {
+        positions[i * 3 + 2] = -400;
+      }
+      if (Math.abs(positions[i * 3]) > 300) {
+        velocities[i].x *= -1;
+      }
+      if (Math.abs(positions[i * 3 + 1]) > 300) {
+        velocities[i].y *= -1;
+      }
+    }
+    starGeo.attributes.position.needsUpdate = true;
+  }
+
+  // Soft camera follow lerping
+  const targetX = mouseX * 0.05;
+  const targetY = -mouseY * 0.05;
+  camera.position.x += (targetX - camera.position.x) * 0.035;
+  camera.position.y += (targetY - camera.position.y) * 0.035;
+  camera.lookAt(scene.position);
+
+  renderer.render(scene, camera);
+}
+
+// Initializing the system on window load
+window.addEventListener("load", () => {
+  init3D();
+});
