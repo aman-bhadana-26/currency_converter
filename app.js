@@ -102,6 +102,9 @@ const updateExchangeRate = async () => {
 
   let finalAmount = (amtVal * rate).toFixed(2);
   msg.innerText = `${amtVal} ${fromCurr.value} = ${finalAmount} ${toCurr.value}`;
+
+  // Save the conversion to local storage history list
+  saveConversionToHistory(fromCurr.value, toCurr.value, amtVal, finalAmount);
 };
 
 const updateFlag = (element) => {
@@ -320,11 +323,87 @@ comparisonAmount.addEventListener("keypress", (e) => {
 createCurrencyChips();
 
 // Auto-load comparison on page load
+// Auto-load comparison and conversion history on page load
 window.addEventListener("load", () => {
   setTimeout(() => {
     compareRates();
+    loadHistory();
   }, 500);
 });
+
+// ========== Conversion History Feature ==========
+
+const historyList = document.getElementById("historyList");
+const clearHistoryBtn = document.getElementById("clearHistoryBtn");
+
+function saveConversionToHistory(from, to, amount, result) {
+  let history = JSON.parse(localStorage.getItem("conversion_history")) || [];
+  
+  const newItem = {
+    from,
+    to,
+    amount: parseFloat(amount),
+    result: parseFloat(result),
+    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  };
+
+  // Add to front of array
+  history.unshift(newItem);
+
+  // Keep only the last 5 conversions
+  if (history.length > 5) {
+    history.pop();
+  }
+
+  localStorage.setItem("conversion_history", JSON.stringify(history));
+  loadHistory();
+}
+
+function loadHistory() {
+  if (!historyList) return;
+  
+  let history = JSON.parse(localStorage.getItem("conversion_history")) || [];
+  
+  if (history.length === 0) {
+    historyList.innerHTML = `<p class="no-history">No recent conversions. Make one above!</p>`;
+    if (clearHistoryBtn) clearHistoryBtn.style.display = "none";
+    return;
+  }
+
+  if (clearHistoryBtn) clearHistoryBtn.style.display = "flex";
+  historyList.innerHTML = "";
+
+  history.forEach(item => {
+    const fromCountry = countryList[item.from];
+    const toCountry = countryList[item.to];
+    
+    const historyCard = document.createElement("div");
+    historyCard.className = "history-item";
+    historyCard.innerHTML = `
+      <div class="history-details">
+        <div class="history-flags">
+          <img src="https://flagsapi.com/${fromCountry}/flat/64.png" alt="${item.from}" />
+          <img src="https://flagsapi.com/${toCountry}/flat/64.png" alt="${item.to}" />
+        </div>
+        <div class="history-rate">
+          <span>${item.amount} ${item.from} <i class="fa-solid fa-arrow-right-long" style="font-size: 0.8rem; color: var(--text-muted); margin: 0 4px;"></i> ${item.result} ${item.to}</span>
+        </div>
+      </div>
+      <div class="history-time">
+        <i class="fa-regular fa-clock"></i> ${item.timestamp}
+      </div>
+    `;
+    historyList.appendChild(historyCard);
+  });
+}
+
+if (clearHistoryBtn) {
+  clearHistoryBtn.addEventListener("click", () => {
+    localStorage.removeItem("conversion_history");
+    loadHistory();
+    showNotification("Conversion history cleared!");
+  });
+}
 
 // ========== Footer Navigation ==========
 

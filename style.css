@@ -770,6 +770,137 @@ form button[type="submit"]:active {
 }
 
 /* ==========================================
+   CONVERSION HISTORY
+   ========================================== */
+.conversion-history {
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--divider);
+  width: 100%;
+}
+
+.conversion-history h3 {
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.conversion-history h3 i {
+  color: var(--primary);
+  font-size: 1.1rem;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 200px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+/* Custom history scrollbar */
+.history-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.history-list::-webkit-scrollbar-thumb {
+  background: var(--divider);
+  border-radius: 10px;
+}
+
+.no-history {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  font-style: italic;
+  text-align: center;
+  padding: 1rem;
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--input-bg);
+  border: 1px solid var(--card-border);
+  padding: 0.8rem 1.2rem;
+  border-radius: 1rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all var(--transition-normal);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.history-item:hover {
+  transform: translateX(4px);
+  border-color: var(--primary);
+  background: var(--card-bg);
+}
+
+.history-item .history-details {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.history-item .history-rate {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.history-item .history-time {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.history-item .history-flags {
+  display: flex;
+  align-items: center;
+}
+
+.history-item .history-flags img {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  border: 2px solid var(--input-bg);
+  object-fit: cover;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.history-item .history-flags img:last-child {
+  margin-left: -0.4rem; /* Overlay style */
+}
+
+.clear-history-btn {
+  margin-top: 1rem;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: color var(--transition-fast);
+  margin-left: auto;
+}
+
+.clear-history-btn:hover {
+  color: #ef4444;
+}
+
+/* ==========================================
    MULTI-CURRENCY COMPARISON MODULE
    ========================================== */
 .comparison-section {
