@@ -405,6 +405,31 @@ if (clearHistoryBtn) {
   });
 }
 
+// ========== FAQ Accordion ==========
+
+const faqQuestions = document.querySelectorAll(".faq-question");
+
+faqQuestions.forEach(question => {
+  question.addEventListener("click", () => {
+    const item = question.parentElement;
+    const answer = item.querySelector(".faq-answer");
+    
+    // Toggle active class on item
+    const isActive = item.classList.contains("active");
+    
+    // Close other FAQ items first
+    document.querySelectorAll(".faq-item").forEach(otherItem => {
+      otherItem.classList.remove("active");
+      otherItem.querySelector(".faq-answer").style.maxHeight = null;
+    });
+
+    if (!isActive) {
+      item.classList.add("active");
+      answer.style.maxHeight = answer.scrollHeight + "px";
+    }
+  });
+});
+
 // ========== Footer Navigation ==========
 
 const scrollToTopBtn = document.getElementById("scrollToTop");
