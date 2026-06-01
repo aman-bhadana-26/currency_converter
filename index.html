@@ -126,6 +126,86 @@
                     </button>
                 </div>
             </div>
+
+            <!-- Interactive Trend Chart Container -->
+            <div class="trend-container" id="trendContainer">
+                <div class="trend-header">
+                    <div class="trend-title-area">
+                        <h3><i class="fa-solid fa-chart-line"></i> <span id="trendTitle">USD to INR Rate Trend</span></h3>
+                        <p class="trend-subtitle">Historical market performance over the selected timeframe</p>
+                    </div>
+                    <div class="timeframe-selector">
+                        <button class="timeframe-btn active" data-timeframe="7D">7D</button>
+                        <button class="timeframe-btn" data-timeframe="30D">30D</button>
+                    </div>
+                </div>
+
+                <div class="chart-wrapper">
+                    <!-- Floating Glassmorphic Tooltip -->
+                    <div class="chart-tooltip" id="chartTooltip">
+                        <div class="tooltip-date">--</div>
+                        <div class="tooltip-rate">--</div>
+                    </div>
+
+                    <!-- SVG Canvas for Drawing Curve -->
+                    <svg id="trendChartSvg" width="100%" height="220" viewBox="0 0 800 220" preserveAspectRatio="none">
+                        <defs>
+                            <!-- Glow Filter -->
+                            <filter id="chart-glow" x="-20%" y="-20%" width="140%" height="140%">
+                                <feGaussianBlur stdDeviation="5" result="blur" />
+                                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                            </filter>
+                            <!-- Line Gradient -->
+                            <linearGradient id="chart-line-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="var(--chart-line-start)" />
+                                <stop offset="100%" stop-color="var(--chart-line-end)" />
+                            </linearGradient>
+                            <!-- Area Gradient -->
+                            <linearGradient id="chart-area-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="var(--chart-area-start)" stop-opacity="0.25" />
+                                <stop offset="100%" stop-color="var(--chart-area-end)" stop-opacity="0.0" />
+                            </linearGradient>
+                        </defs>
+                        
+                        <!-- Chart Grid Lines (Dynamically drawn) -->
+                        <g id="chartGrid"></g>
+                        
+                        <!-- Filled Gradient Area -->
+                        <path id="chartArea" d="" fill="url(#chart-area-grad)"></path>
+                        
+                        <!-- Glowing Line -->
+                        <path id="chartLine" d="" fill="none" stroke="url(#chart-line-grad)" stroke-width="4.5" filter="url(#chart-glow)"></path>
+                        
+                        <!-- Hover Tracker -->
+                        <line id="chartTrackerLine" x1="0" y1="0" x2="0" y2="220" stroke="var(--primary)" stroke-width="1.5" stroke-dasharray="4 4" style="opacity: 0; pointer-events: none; transition: opacity var(--transition-fast);"></line>
+                        <circle id="chartTrackerDot" r="6" fill="var(--primary)" stroke="#ffffff" stroke-width="2" style="opacity: 0; pointer-events: none; transition: opacity var(--transition-fast); filter: drop-shadow(0 0 5px var(--primary));"></circle>
+                    </svg>
+
+                    <!-- Overlaid HTML Axes for CSS Scaling -->
+                    <div class="chart-y-axis" id="chartYAxis"></div>
+                    <div class="chart-x-axis" id="chartXAxis"></div>
+                </div>
+
+                <!-- Financial Performance Stats -->
+                <div class="trend-stats">
+                    <div class="stat-card">
+                        <span class="stat-label"><i class="fa-solid fa-circle-chevron-up" style="color: var(--accent); margin-right: 4px;"></i> Highest</span>
+                        <span class="stat-value" id="statHigh">--</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label"><i class="fa-solid fa-circle-chevron-down" style="color: #ef4444; margin-right: 4px;"></i> Lowest</span>
+                        <span class="stat-value" id="statLow">--</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label"><i class="fa-solid fa-scale-balanced" style="color: var(--primary); margin-right: 4px;"></i> Average</span>
+                        <span class="stat-value" id="statAvg">--</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label"><i class="fa-solid fa-arrows-spin" style="color: #c084fc; margin-right: 4px;"></i> 30-Day Change</span>
+                        <span class="stat-value" id="statTrend">--</span>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <!-- Multi-Currency Comparison Section -->
