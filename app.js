@@ -699,6 +699,7 @@ window.addEventListener("load", () => {
   setupTrendChartBindings();
   initCustomSelects();
   fetchTickerRates();
+  initNavIndicator();
 });
 
 // ========== Interactive Trend Chart Feature ==========
@@ -1220,4 +1221,62 @@ function startTickerFluctuations() {
     updateTickerUI();
   }, 4000);
 }
+
+// ========== Floating Nav Link Indicator Pill ==========
+function initNavIndicator() {
+  const navMenu = document.getElementById("navMenu");
+  const pill = document.getElementById("navIndicatorPill");
+  const links = document.querySelectorAll(".nav-link");
+  
+  if (!navMenu || !pill || links.length === 0) return;
+  
+  function updatePillPosition(link) {
+    pill.style.opacity = "1";
+    pill.style.left = `${link.offsetLeft}px`;
+    pill.style.top = `${link.offsetTop}px`;
+    pill.style.width = `${link.offsetWidth}px`;
+    pill.style.height = `${link.offsetHeight}px`;
+  }
+  
+  function resetToActive() {
+    // Only show the pill if the screen size is not too small, or let it work vertically too
+    const activeLink = navMenu.querySelector(".nav-link.active");
+    if (activeLink) {
+      updatePillPosition(activeLink);
+    } else {
+      pill.style.opacity = "0";
+    }
+  }
+  
+  // Track hovers
+  links.forEach(link => {
+    link.addEventListener("mouseenter", () => {
+      updatePillPosition(link);
+    });
+  });
+  
+  navMenu.addEventListener("mouseleave", () => {
+    resetToActive();
+  });
+  
+  // Initialize position
+  resetToActive();
+  
+  // Update on window resize (since layout positions might shift)
+  window.addEventListener("resize", resetToActive);
+  
+  // Monitor active link change via MutationObserver
+  // The scroll listener in app.js toggles ".active" class on links
+  const observer = new MutationObserver(() => {
+    resetToActive();
+  });
+  
+  links.forEach(link => {
+    observer.observe(link, { attributes: true, attributeFilter: ["class"] });
+  });
+  
+  // Small delay on load to ensure fonts and layouts are fully settled
+  setTimeout(resetToActive, 150);
+}
+
 

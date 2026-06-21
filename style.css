@@ -296,10 +296,59 @@ body.dark-theme .navbar.scrolled {
   font-weight: 800;
 }
 
+.navbar::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 100px;
+  padding: 1.2px;
+  background: linear-gradient(90deg, var(--primary), var(--accent), var(--primary));
+  background-size: 200% auto;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.18;
+  transition: opacity var(--transition-normal);
+}
+
+.navbar:hover::before {
+  opacity: 0.7;
+  animation: navbarBorderGlow 4s linear infinite;
+}
+
+@keyframes navbarBorderGlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
 .nav-menu {
   display: flex;
   list-style: none;
   gap: 0.25rem;
+  position: relative; /* Essential for relative positioning of indicator pill */
+}
+
+.nav-indicator-pill {
+  position: absolute;
+  border-radius: 50px;
+  background: var(--primary-glow);
+  border: 1px solid rgba(99, 102, 241, 0.12);
+  transition: left 0.38s cubic-bezier(0.25, 1, 0.5, 1),
+              top 0.38s cubic-bezier(0.25, 1, 0.5, 1),
+              width 0.38s cubic-bezier(0.25, 1, 0.5, 1),
+              height 0.38s cubic-bezier(0.25, 1, 0.5, 1),
+              opacity 0.25s ease;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+}
+
+body.dark-theme .nav-indicator-pill {
+  background: rgba(129, 140, 248, 0.12);
+  border-color: rgba(129, 140, 248, 0.2);
 }
 
 .nav-link {
@@ -313,8 +362,9 @@ body.dark-theme .navbar.scrolled {
   font-weight: 600;
   font-size: 0.92rem;
   border-radius: 50px;
-  transition: all var(--transition-normal);
+  transition: color var(--transition-normal);
   position: relative;
+  z-index: 1; /* Place text above the sliding indicator */
 }
 
 .nav-link i {
@@ -325,7 +375,6 @@ body.dark-theme .navbar.scrolled {
 
 .nav-link:hover {
   color: var(--text-main);
-  background: rgba(99, 102, 241, 0.06);
 }
 
 .nav-link:hover i {
@@ -335,7 +384,6 @@ body.dark-theme .navbar.scrolled {
 
 .nav-link.active {
   color: var(--primary);
-  background: var(--primary-glow);
 }
 
 .nav-link.active i {
