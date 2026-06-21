@@ -114,8 +114,26 @@ const updateFlag = (element) => {
   let currCode = element.value;
   let countryCode = countryList[currCode];
   let newSrc = `https://flagsapi.com/${countryCode}/flat/64.png`;
+  
+  // Find img inside parent (works for both custom selects and old selects)
   let img = element.parentElement.querySelector("img");
-  img.src = newSrc;
+  if (img) img.src = newSrc;
+  
+  // Also update custom select trigger text if custom select is used
+  let triggerText = element.parentElement.querySelector(".selected-text");
+  if (triggerText) {
+    triggerText.textContent = currCode;
+  }
+  
+  // Highlight selected item in options list
+  let options = element.parentElement.querySelectorAll(".custom-option");
+  options.forEach(opt => {
+    if (opt.getAttribute("data-value") === currCode) {
+      opt.classList.add("selected");
+    } else {
+      opt.classList.remove("selected");
+    }
+  });
 };
 
 btn.addEventListener("click", (evt) => {
@@ -383,19 +401,57 @@ function loadHistory() {
     const historyCard = document.createElement("div");
     historyCard.className = "history-item";
     historyCard.innerHTML = `
-      <div class="history-details">
-        <div class="history-flags">
-          <img src="https://flagsapi.com/${fromCountry}/flat/64.png" alt="${item.from}" />
-          <img src="https://flagsapi.com/${toCountry}/flat/64.png" alt="${item.to}" />
+      <div class="history-content-area">
+        <div class="history-details">
+          <div class="history-flags">
+            <img src="https://flagsapi.com/${fromCountry}/flat/64.png" alt="${item.from}" />
+            <img src="https://flagsapi.com/${toCountry}/flat/64.png" alt="${item.to}" />
+          </div>
+          <div class="history-rate">
+            <span>${item.amount} ${item.from} <i class="fa-solid fa-arrow-right-long" style="font-size: 0.8rem; color: var(--text-muted); margin: 0 4px;"></i> ${item.result} ${item.to}</span>
+          </div>
         </div>
-        <div class="history-rate">
-          <span>${item.amount} ${item.from} <i class="fa-solid fa-arrow-right-long" style="font-size: 0.8rem; color: var(--text-muted); margin: 0 4px;"></i> ${item.result} ${item.to}</span>
+        <div class="history-time">
+          <i class="fa-regular fa-clock"></i> ${item.timestamp}
         </div>
       </div>
-      <div class="history-time">
-        <i class="fa-regular fa-clock"></i> ${item.timestamp}
+      <div class="history-actions">
+        <button class="history-action-btn reuse" title="Reuse conversion parameters">
+          <i class="fa-solid fa-rotate-left"></i>
+        </button>
+        <button class="history-action-btn delete-single" title="Delete this item">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       </div>
     `;
+
+    // Reuse button click handler
+    const reuseBtn = historyCard.querySelector(".history-action-btn.reuse");
+    reuseBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const amountInput = document.querySelector(".amount input");
+      if (amountInput) {
+        amountInput.value = item.amount;
+      }
+      fromCurr.value = item.from;
+      toCurr.value = item.to;
+      updateFlag(fromCurr);
+      updateFlag(toCurr);
+      updateExchangeRate();
+      const converterSection = document.getElementById("converter");
+      if (converterSection) {
+        converterSection.scrollIntoView({ behavior: "smooth" });
+      }
+      showNotification("Restored conversion parameters!");
+    });
+
+    // Delete single button handler
+    const deleteBtn = historyCard.querySelector(".history-action-btn.delete-single");
+    deleteBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      deleteHistoryItem(item);
+    });
+
     historyList.appendChild(historyCard);
   });
 }
@@ -641,6 +697,8 @@ function animate() {
 window.addEventListener("load", () => {
   init3D();
   setupTrendChartBindings();
+  initCustomSelects();
+  fetchTickerRates();
 });
 
 // ========== Interactive Trend Chart Feature ==========
@@ -777,6 +835,7 @@ function drawTrendChart(from, to, dataPoints) {
   const ySpanAdjusted = yMaxAdjusted - yMinAdjusted;
 
   // Calculate (x, y) coordinates
+  // Calculate (x, y) coordinates
   const N = dataPoints.length;
   chartDataPoints = dataPoints.map((p, i) => {
     const x = paddingLeft + (i / (N - 1)) * (width - paddingLeft - paddingRight);
@@ -788,11 +847,26 @@ function drawTrendChart(from, to, dataPoints) {
     };
   });
 
-  // Build curve line SVG path (M x0,y0 L x1,y1 ...)
-  const lineD = chartDataPoints.map((p, i) =>
-    `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)},${p.y.toFixed(1)}`
-  ).join(' ');
+  // Build curve line SVG path using cubic bezier splines
+  const getBezierSplinePath = (points) => {
+    if (points.length < 2) return "";
+    let path = `M ${points[0].x.toFixed(1)},${points[0].y.toFixed(1)}`;
+    const tension = 0.15;
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[i - 1] || points[i];
+      const p1 = points[i];
+      const p2 = points[i + 1];
+      const p3 = points[i + 2] || p2;
+      const cp1x = p1.x + (p2.x - p0.x) * tension;
+      const cp1y = p1.y + (p2.y - p0.y) * tension;
+      const cp2x = p2.x - (p3.x - p1.x) * tension;
+      const cp2y = p2.y - (p3.y - p1.y) * tension;
+      path += ` C ${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`;
+    }
+    return path;
+  };
 
+  const lineD = getBezierSplinePath(chartDataPoints);
   chartLine.setAttribute("d", lineD);
 
   // Build area fill SVG path
@@ -952,3 +1026,198 @@ function setupTrendChartBindings() {
   // Initial interactivity attachment
   initChartInteractivity();
 }
+
+// ========== Single History Item Deletion ==========
+function deleteHistoryItem(targetItem) {
+  let history = JSON.parse(localStorage.getItem("conversion_history")) || [];
+  history = history.filter(item => !(
+    item.from === targetItem.from &&
+    item.to === targetItem.to &&
+    item.amount === targetItem.amount &&
+    item.result === targetItem.result &&
+    item.timestamp === targetItem.timestamp
+  ));
+  localStorage.setItem("conversion_history", JSON.stringify(history));
+  loadHistory();
+  showNotification("Conversion history item deleted!");
+}
+
+// ========== Custom Searchable Select Dropdown Logic ==========
+function initCustomSelects() {
+  const customContainers = document.querySelectorAll(".custom-select-container");
+  
+  customContainers.forEach(container => {
+    const select = container.querySelector("select");
+    const trigger = container.querySelector(".custom-select-trigger");
+    const menu = container.querySelector(".custom-select-menu");
+    const searchInput = container.querySelector(".search-input");
+    const optionsWrapper = container.querySelector(".options-wrapper");
+    
+    if (!select || !trigger || !menu || !searchInput || !optionsWrapper) return;
+    
+    const buildOptions = () => {
+      optionsWrapper.innerHTML = "";
+      const selectOptions = select.querySelectorAll("option");
+      
+      selectOptions.forEach(opt => {
+        const currCode = opt.value;
+        const countryCode = countryList[currCode] || "US";
+        const name = currencyNames[currCode] || currCode;
+        
+        const customOpt = document.createElement("div");
+        customOpt.className = "custom-option";
+        if (opt.selected) {
+          customOpt.classList.add("selected");
+          // Initialize trigger values
+          const flagImg = trigger.querySelector("img");
+          if (flagImg) flagImg.src = `https://flagsapi.com/${countryCode}/flat/64.png`;
+          const textEl = trigger.querySelector(".selected-text");
+          if (textEl) textEl.textContent = currCode;
+        }
+        customOpt.setAttribute("data-value", currCode);
+        customOpt.innerHTML = `
+          <img src="https://flagsapi.com/${countryCode}/flat/64.png" alt="${currCode} flag" onerror="this.style.display='none'" />
+          <span class="option-code">${currCode}</span>
+          <span class="option-name">${name}</span>
+        `;
+        
+        customOpt.addEventListener("click", () => {
+          select.value = currCode;
+          container.classList.remove("active");
+          
+          // Trigger change event to fire updateExchangeRate or compareRates
+          const event = new Event("change");
+          select.dispatchEvent(event);
+          updateFlag(select);
+        });
+        
+        optionsWrapper.appendChild(customOpt);
+      });
+    };
+    
+    // Trigger open/close
+    trigger.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isActive = container.classList.contains("active");
+      
+      // Close all other custom dropdowns
+      document.querySelectorAll(".custom-select-container").forEach(c => {
+        c.classList.remove("active");
+      });
+      
+      if (!isActive) {
+        container.classList.add("active");
+        searchInput.value = "";
+        filterList("");
+        searchInput.focus();
+      }
+    });
+    
+    // Prevent menu clicks from closing dropdown
+    menu.addEventListener("click", (e) => {
+      e.stopPropagation();
+    });
+    
+    // Filter options on typing
+    searchInput.addEventListener("input", (e) => {
+      filterList(e.target.value);
+    });
+    
+    const filterList = (query) => {
+      const term = query.toLowerCase().trim();
+      const options = optionsWrapper.querySelectorAll(".custom-option");
+      options.forEach(opt => {
+        const code = opt.querySelector(".option-code").textContent.toLowerCase();
+        const name = opt.querySelector(".option-name").textContent.toLowerCase();
+        if (code.includes(term) || name.includes(term)) {
+          opt.style.display = "flex";
+        } else {
+          opt.style.display = "none";
+        }
+      });
+    };
+    
+    // Build options initially
+    buildOptions();
+    
+    // Re-build options if options list changes
+    const observer = new MutationObserver(() => {
+      buildOptions();
+    });
+    observer.observe(select, { childList: true });
+  });
+  
+  // Close any open dropdowns when clicking anywhere outside
+  document.addEventListener("click", () => {
+    document.querySelectorAll(".custom-select-container").forEach(c => {
+      c.classList.remove("active");
+    });
+  });
+}
+
+// ========== Hero Live Rates Ticker Simulation ==========
+const tickerPairs = {
+  EURUSD: { from: "EUR", to: "USD", baseVal: 1.0850, currentVal: 1.0850, change: 0.12 },
+  GBPUSD: { from: "GBP", to: "USD", baseVal: 1.2680, currentVal: 1.2680, change: -0.05 },
+  USDJPY: { from: "USD", to: "JPY", baseVal: 157.45, currentVal: 157.45, change: 0.22 }
+};
+
+async function fetchTickerRates() {
+  try {
+    for (const key in tickerPairs) {
+      const pair = tickerPairs[key];
+      const res = await fetch(`${BASE_URL}/${pair.from}`);
+      if (res.ok) {
+        const data = await res.json();
+        const rate = data.rates[pair.to];
+        if (rate) {
+          pair.baseVal = rate;
+          pair.currentVal = rate;
+        }
+      }
+    }
+  } catch (err) {
+    console.warn("Could not fetch ticker live rates, using defaults.", err);
+  }
+  updateTickerUI();
+  startTickerFluctuations();
+}
+
+function updateTickerUI() {
+  for (const key in tickerPairs) {
+    const pair = tickerPairs[key];
+    const valueEl = document.getElementById(`ticker-${key}`);
+    const changeEl = document.getElementById(`change-${key}`);
+    
+    if (valueEl && changeEl) {
+      valueEl.textContent = pair.currentVal.toFixed(key === "USDJPY" ? 2 : 4);
+      
+      const changeSign = pair.change >= 0 ? "+" : "";
+      
+      if (pair.change >= 0) {
+        changeEl.className = "ticker-change up";
+        changeEl.innerHTML = `<i class="fa-solid fa-caret-up"></i> ${changeSign}${pair.change.toFixed(2)}%`;
+      } else {
+        changeEl.className = "ticker-change down";
+        changeEl.innerHTML = `<i class="fa-solid fa-caret-down"></i> ${pair.change.toFixed(2)}%`;
+      }
+    }
+  }
+}
+
+function startTickerFluctuations() {
+  // Update every 4 seconds with small simulated deviations
+  setInterval(() => {
+    for (const key in tickerPairs) {
+      const pair = tickerPairs[key];
+      // Random change between -0.05% and +0.05%
+      const fluctuation = (Math.random() - 0.5) * 0.001; 
+      pair.currentVal = pair.currentVal * (1 + fluctuation);
+      
+      // Calculate net change compared to base value
+      pair.change = ((pair.currentVal - pair.baseVal) / pair.baseVal) * 100;
+    }
+    updateTickerUI();
+  }, 4000);
+}
+

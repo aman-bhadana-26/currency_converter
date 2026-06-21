@@ -63,6 +63,47 @@
                 <span class="hero-tag">Live Exchange Rates</span>
                 <h1>Supercharge Your <br><span class="gradient-text">Global Transactions</span></h1>
                 <p>Experience lightning-fast currency conversion and compare multi-currency rates side-by-side on our premium interactive dashboard. Powered by real-time market data.</p>
+                <div class="live-ticker-container">
+                    <div class="ticker-card" data-pair="EURUSD">
+                        <div class="ticker-pair">
+                            <span class="ticker-flags">
+                                <img src="https://flagsapi.com/FR/flat/64.png" alt="EUR" />
+                                <img src="https://flagsapi.com/US/flat/64.png" alt="USD" />
+                            </span>
+                            <span class="pair-name">EUR/USD</span>
+                        </div>
+                        <div class="ticker-info">
+                            <span class="ticker-value" id="ticker-EURUSD">1.0850</span>
+                            <span class="ticker-change" id="change-EURUSD">+0.12%</span>
+                        </div>
+                    </div>
+                    <div class="ticker-card" data-pair="GBPUSD">
+                        <div class="ticker-pair">
+                            <span class="ticker-flags">
+                                <img src="https://flagsapi.com/GB/flat/64.png" alt="GBP" />
+                                <img src="https://flagsapi.com/US/flat/64.png" alt="USD" />
+                            </span>
+                            <span class="pair-name">GBP/USD</span>
+                        </div>
+                        <div class="ticker-info">
+                            <span class="ticker-value" id="ticker-GBPUSD">1.2680</span>
+                            <span class="ticker-change" id="change-GBPUSD">-0.05%</span>
+                        </div>
+                    </div>
+                    <div class="ticker-card" data-pair="USDJPY">
+                        <div class="ticker-pair">
+                            <span class="ticker-flags">
+                                <img src="https://flagsapi.com/US/flat/64.png" alt="USD" />
+                                <img src="https://flagsapi.com/JP/flat/64.png" alt="JPY" />
+                            </span>
+                            <span class="pair-name">USD/JPY</span>
+                        </div>
+                        <div class="ticker-info">
+                            <span class="ticker-value" id="ticker-USDJPY">157.45</span>
+                            <span class="ticker-change" id="change-USDJPY">+0.22%</span>
+                        </div>
+                    </div>
+                </div>
                 <div class="hero-buttons">
                     <a href="#converter" class="btn btn-primary">Start Converting</a>
                     <a href="#comparison-section" class="btn btn-secondary">Compare Rates</a>
@@ -88,9 +129,22 @@
                     <div class="dropdown">
                         <div class="from">
                             <p>From</p>
-                            <div class="select-container">
-                                <img src="https://flagsapi.com/US/flat/64.png" alt="USD flag" id="fromFlag" />
-                                <select name="from" aria-label="From currency"></select>
+                            <div class="custom-select-container" id="fromCustomSelect">
+                                <div class="custom-select-trigger">
+                                    <img src="https://flagsapi.com/US/flat/64.png" alt="USD flag" id="fromFlag" />
+                                    <span class="selected-text">USD</span>
+                                    <i class="fa-solid fa-chevron-down caret-icon"></i>
+                                </div>
+                                <div class="custom-select-menu">
+                                    <div class="search-wrapper">
+                                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                                        <input type="text" class="search-input" placeholder="Search currency..." autocomplete="off">
+                                    </div>
+                                    <div class="options-wrapper">
+                                        <!-- populated dynamically by JS -->
+                                    </div>
+                                </div>
+                                <select name="from" aria-label="From currency" style="display: none;"></select>
                             </div>
                         </div>
                         
@@ -100,9 +154,22 @@
                         
                         <div class="to">
                             <p>To</p>
-                            <div class="select-container">
-                                <img src="https://flagsapi.com/IN/flat/64.png" alt="INR flag" id="toFlag" />
-                                <select name="to" aria-label="To currency"></select>
+                            <div class="custom-select-container" id="toCustomSelect">
+                                <div class="custom-select-trigger">
+                                    <img src="https://flagsapi.com/IN/flat/64.png" alt="INR flag" id="toFlag" />
+                                    <span class="selected-text">INR</span>
+                                    <i class="fa-solid fa-chevron-down caret-icon"></i>
+                                </div>
+                                <div class="custom-select-menu">
+                                    <div class="search-wrapper">
+                                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                                        <input type="text" class="search-input" placeholder="Search currency..." autocomplete="off">
+                                    </div>
+                                    <div class="options-wrapper">
+                                        <!-- populated dynamically by JS -->
+                                    </div>
+                                </div>
+                                <select name="to" aria-label="To currency" style="display: none;"></select>
                             </div>
                         </div>
                     </div>
@@ -217,9 +284,22 @@
                 <div class="comparison-controls">
                     <div class="base-currency-selector">
                         <label for="baseCurrency">Base Currency</label>
-                        <div class="select-container">
-                            <img src="https://flagsapi.com/US/flat/64.png" alt="Base currency flag" id="baseFlag" />
-                            <select id="baseCurrency"></select>
+                        <div class="custom-select-container" id="baseCustomSelect">
+                            <div class="custom-select-trigger">
+                                <img src="https://flagsapi.com/US/flat/64.png" alt="Base currency flag" id="baseFlag" />
+                                <span class="selected-text">USD</span>
+                                <i class="fa-solid fa-chevron-down caret-icon"></i>
+                            </div>
+                            <div class="custom-select-menu">
+                                <div class="search-wrapper">
+                                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                                    <input type="text" class="search-input" placeholder="Search currency..." autocomplete="off">
+                                </div>
+                                <div class="options-wrapper">
+                                    <!-- populated dynamically by JS -->
+                                </div>
+                            </div>
+                            <select id="baseCurrency" style="display: none;"></select>
                         </div>
                     </div>
                     
