@@ -507,10 +507,20 @@ if (scrollToTopBtn) {
 
 // ========== Interactive 3D WebGL Background (Three.js) ==========
 
-let scene, camera, renderer, starGeo, stars, shapesGroup;
+let scene, camera, renderer, starGeo, stars, lineGeo, linesMesh;
 let mouseX = 0, mouseY = 0;
-const particleCount = 250;
+let mouse3D = new THREE.Vector3(0, 0, -1);
+let mouseScenePos = new THREE.Vector3(0, 0, 0);
+
+const particleCount = 120;
 const velocities = [];
+const maxLines = 450;
+const linePositions = new Float32Array(maxLines * 2 * 3);
+const lineColors = new Float32Array(maxLines * 2 * 3);
+
+let isDarkTheme = document.body.classList.contains("dark-theme");
+let baseLineColor = new THREE.Color(isDarkTheme ? 0x818cf8 : 0x6366f1);
+let particleColorVal = isDarkTheme ? 0xc084fc : 0x4f46e5;
 
 function init3D() {
   const canvas = document.getElementById("webgl-bg");
@@ -521,46 +531,16 @@ function init3D() {
 
   // Camera setup
   camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
-  camera.position.z = 220;
+  camera.position.z = 250;
 
   // Renderer setup
   renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-  // Shapes Group
-  shapesGroup = new THREE.Group();
-  scene.add(shapesGroup);
-
-  // Generate three geometric structures with custom dimensions
-  const geometries = [
-    new THREE.TorusKnotGeometry(18, 5, 120, 16),
-    new THREE.IcosahedronGeometry(20, 1),
-    new THREE.TorusGeometry(15, 4, 16, 100)
-  ];
-
-  // Starting positions scattered in depth
-  const initialPositions = [
-    { x: -110, y: 35, z: 20 },
-    { x: 110, y: -30, z: 10 },
-    { x: -75, y: -70, z: -15 }
-  ];
-
-  const isDark = document.body.classList.contains("dark-theme");
-  const shapeColors = isDark ? [0x6366f1, 0xc084fc, 0x38bdf8] : [0x818cf8, 0xf472b6, 0x7dd3fc];
-  const opacities = isDark ? [0.16, 0.11, 0.13] : [0.07, 0.04, 0.06];
-
-  geometries.forEach((geo, index) => {
-    const mat = new THREE.MeshBasicMaterial({
-      color: shapeColors[index % shapeColors.length],
-      wireframe: true,
-      transparent: true,
-      opacity: opacities[index % opacities.length]
-    });
-    const mesh = new THREE.Mesh(geo, mat);
-    mesh.position.set(initialPositions[index].x, initialPositions[index].y, initialPositions[index].z);
-    shapesGroup.add(mesh);
-  });
+  isDarkTheme = document.body.classList.contains("dark-theme");
+  baseLineColor = new THREE.Color(isDarkTheme ? 0x818cf8 : 0x6366f1);
+  particleColorVal = isDarkTheme ? 0xc084fc : 0x4f46e5;
 
   // Generate glowing circles canvas texture for particles
   const particleCanvas = document.createElement('canvas');
@@ -574,17 +554,21 @@ function init3D() {
   ctx.fillRect(0, 0, 16, 16);
   const particleTexture = new THREE.CanvasTexture(particleCanvas);
 
-  // Generate particle systems (Starfield)
+  // Generate constellation nodes
   const starPositions = new Float32Array(particleCount * 3);
   for (let i = 0; i < particleCount; i++) {
-    starPositions[i * 3] = (Math.random() - 0.5) * 600;
-    starPositions[i * 3 + 1] = (Math.random() - 0.5) * 600;
-    starPositions[i * 3 + 2] = (Math.random() - 0.5) * 600;
+    const x = (Math.random() - 0.5) * 450;
+    const y = (Math.random() - 0.5) * 450;
+    const z = (Math.random() - 0.5) * 300;
+
+    starPositions[i * 3] = x;
+    starPositions[i * 3 + 1] = y;
+    starPositions[i * 3 + 2] = z;
 
     velocities.push({
-      x: (Math.random() - 0.5) * 0.08,
-      y: (Math.random() - 0.5) * 0.08,
-      z: Math.random() * 0.08 + 0.02
+      x: (Math.random() - 0.5) * 0.25,
+      y: (Math.random() - 0.5) * 0.25,
+      z: (Math.random() - 0.5) * 0.15
     });
   }
 
@@ -592,11 +576,11 @@ function init3D() {
   starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
 
   const starMat = new THREE.PointsMaterial({
-    color: isDark ? 0x818cf8 : 0x4f46e5,
-    size: 4.5,
+    color: particleColorVal,
+    size: 5.5,
     map: particleTexture,
     transparent: true,
-    opacity: isDark ? 0.55 : 0.22,
+    opacity: isDarkTheme ? 0.8 : 0.45,
     blending: THREE.AdditiveBlending,
     depthWrite: false
   });
@@ -604,46 +588,64 @@ function init3D() {
   stars = new THREE.Points(starGeo, starMat);
   scene.add(stars);
 
-  // Mouse move listener for camera tracking
-  window.addEventListener("mousemove", (e) => {
-    mouseX = (e.clientX - window.innerWidth / 2) * 0.4;
-    mouseY = (e.clientY - window.innerHeight / 2) * 0.4;
+  // Line segments geometry for connections
+  lineGeo = new THREE.BufferGeometry();
+  lineGeo.setAttribute('position', new THREE.BufferAttribute(linePositions, 3));
+  lineGeo.setAttribute('color', new THREE.BufferAttribute(lineColors, 3));
+
+  const lineMat = new THREE.LineBasicMaterial({
+    vertexColors: true,
+    transparent: true,
+    opacity: isDarkTheme ? 0.45 : 0.25,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
   });
 
-  // Touch listener support for mobile
-  window.addEventListener("touchmove", (e) => {
-    if (e.touches.length > 0) {
-      mouseX = (e.touches[0].clientX - window.innerWidth / 2) * 0.3;
-      mouseY = (e.touches[0].clientY - window.innerHeight / 2) * 0.3;
-    }
-  });
+  linesMesh = new THREE.LineSegments(lineGeo, lineMat);
+  scene.add(linesMesh);
 
-  // Resize listener
+  // Interaction and resize listeners
+  window.addEventListener("mousemove", onMouseMove);
+  window.addEventListener("touchmove", onTouchMove);
   window.addEventListener("resize", onWindowResize);
 
   // Start loop
   animate();
 }
 
+function onMouseMove(e) {
+  mouseX = (e.clientX - window.innerWidth / 2) * 0.4;
+  mouseY = (e.clientY - window.innerHeight / 2) * 0.4;
+
+  mouse3D.x = (e.clientX / window.innerWidth) * 2 - 1;
+  mouse3D.y = -(e.clientY / window.innerHeight) * 2 + 1;
+}
+
+function onTouchMove(e) {
+  if (e.touches.length > 0) {
+    const touch = e.touches[0];
+    mouseX = (touch.clientX - window.innerWidth / 2) * 0.3;
+    mouseY = (touch.clientY - window.innerHeight / 2) * 0.3;
+
+    mouse3D.x = (touch.clientX / window.innerWidth) * 2 - 1;
+    mouse3D.y = -(touch.clientY / window.innerHeight) * 2 + 1;
+  }
+}
+
 function update3DColors(isDark) {
   if (!scene) return;
 
-  const shapeColors = isDark ? [0x6366f1, 0xc084fc, 0x38bdf8] : [0x818cf8, 0xf472b6, 0x7dd3fc];
-  const particleColor = isDark ? 0x818cf8 : 0x4f46e5;
-  const opacities = isDark ? [0.16, 0.11, 0.13] : [0.07, 0.04, 0.06];
-
-  if (shapesGroup) {
-    shapesGroup.children.forEach((mesh, index) => {
-      if (mesh.material) {
-        mesh.material.color.setHex(shapeColors[index % shapeColors.length]);
-        mesh.material.opacity = opacities[index % opacities.length];
-      }
-    });
-  }
+  isDarkTheme = isDark;
+  baseLineColor.setHex(isDark ? 0x818cf8 : 0x6366f1);
+  particleColorVal = isDark ? 0xc084fc : 0x4f46e5;
 
   if (stars && stars.material) {
-    stars.material.color.setHex(particleColor);
-    stars.material.opacity = isDark ? 0.55 : 0.22;
+    stars.material.color.setHex(particleColorVal);
+    stars.material.opacity = isDark ? 0.8 : 0.45;
+  }
+
+  if (linesMesh && linesMesh.material) {
+    linesMesh.material.opacity = isDark ? 0.45 : 0.25;
   }
 }
 
@@ -657,42 +659,115 @@ function onWindowResize() {
 function animate() {
   requestAnimationFrame(animate);
 
-  // Animate geometries
-  if (shapesGroup) {
-    shapesGroup.children.forEach((mesh, index) => {
-      mesh.rotation.x += 0.0015 * (index % 2 === 0 ? 1 : -1);
-      mesh.rotation.y += 0.001 * (index % 2 === 0 ? -1 : 1);
-      mesh.position.y += Math.sin(Date.now() * 0.0006 + index) * 0.025;
-    });
+  if (!scene || !camera || !renderer) return;
+
+  // Calculate mouse scene position in 3D (z = 0 plane)
+  const tempV = new THREE.Vector3(mouse3D.x, mouse3D.y, 0.5);
+  tempV.unproject(camera);
+  const dir = tempV.sub(camera.position).normalize();
+  const distance = -camera.position.z / dir.z;
+  mouseScenePos.copy(camera.position).add(dir.multiplyScalar(distance));
+
+  // Update nodes positions & repulsion forces
+  const positions = starGeo.attributes.position.array;
+  for (let i = 0; i < particleCount; i++) {
+    let x = positions[i * 3];
+    let y = positions[i * 3 + 1];
+    let z = positions[i * 3 + 2];
+
+    x += velocities[i].x;
+    y += velocities[i].y;
+    z += velocities[i].z;
+
+    // Mouse repulsion force
+    const dx = x - mouseScenePos.x;
+    const dy = y - mouseScenePos.y;
+    const dz = z - mouseScenePos.z;
+    const distToMouse = Math.sqrt(dx * dx + dy * dy + dz * dz);
+    if (distToMouse < 120) {
+      const force = (120 - distToMouse) / 120 * 0.65;
+      x += (dx / distToMouse) * force;
+      y += (dy / distToMouse) * force;
+    }
+
+    // Wrap around boundaries
+    const limitX = 260;
+    const limitY = 260;
+    const limitZ = 200;
+
+    if (x > limitX) x = -limitX;
+    else if (x < -limitX) x = limitX;
+
+    if (y > limitY) y = -limitY;
+    else if (y < -limitY) y = limitY;
+
+    if (z > limitZ) z = -limitZ;
+    else if (z < -limitZ) z = limitZ;
+
+    positions[i * 3] = x;
+    positions[i * 3 + 1] = y;
+    positions[i * 3 + 2] = z;
   }
+  starGeo.attributes.position.needsUpdate = true;
 
-  // Animate particle cloud
-  if (starGeo) {
-    const positions = starGeo.attributes.position.array;
-    for (let i = 0; i < particleCount; i++) {
-      positions[i * 3 + 2] += velocities[i].z;
-      positions[i * 3] += velocities[i].x;
-      positions[i * 3 + 1] += velocities[i].y;
+  // Connect nearby nodes
+  let lineCount = 0;
+  const lPos = lineGeo.attributes.position.array;
+  const lCol = lineGeo.attributes.color.array;
+  const minDistance = 85;
 
-      // Wrap-around boundary conditions
-      if (positions[i * 3 + 2] > 200) {
-        positions[i * 3 + 2] = -400;
-      }
-      if (Math.abs(positions[i * 3]) > 300) {
-        velocities[i].x *= -1;
-      }
-      if (Math.abs(positions[i * 3 + 1]) > 300) {
-        velocities[i].y *= -1;
+  for (let i = 0; i < particleCount; i++) {
+    const x1 = positions[i * 3];
+    const y1 = positions[i * 3 + 1];
+    const z1 = positions[i * 3 + 2];
+
+    for (let j = i + 1; j < particleCount; j++) {
+      if (lineCount >= maxLines) break;
+
+      const x2 = positions[j * 3];
+      const y2 = positions[j * 3 + 1];
+      const z2 = positions[j * 3 + 2];
+
+      const dx = x1 - x2;
+      const dy = y1 - y2;
+      const dz = z1 - z2;
+      const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+      if (dist < minDistance) {
+        const idx = lineCount * 6;
+
+        lPos[idx] = x1;
+        lPos[idx + 1] = y1;
+        lPos[idx + 2] = z1;
+
+        lPos[idx + 3] = x2;
+        lPos[idx + 4] = y2;
+        lPos[idx + 5] = z2;
+
+        const alpha = 1 - (dist / minDistance);
+
+        lCol[idx] = baseLineColor.r * alpha;
+        lCol[idx + 1] = baseLineColor.g * alpha;
+        lCol[idx + 2] = baseLineColor.b * alpha;
+
+        lCol[idx + 3] = baseLineColor.r * alpha;
+        lCol[idx + 4] = baseLineColor.g * alpha;
+        lCol[idx + 5] = baseLineColor.b * alpha;
+
+        lineCount++;
       }
     }
-    starGeo.attributes.position.needsUpdate = true;
   }
+
+  lineGeo.setDrawRange(0, lineCount * 2);
+  lineGeo.attributes.position.needsUpdate = true;
+  lineGeo.attributes.color.needsUpdate = true;
 
   // Soft camera follow lerping
   const targetX = mouseX * 0.05;
   const targetY = -mouseY * 0.05;
-  camera.position.x += (targetX - camera.position.x) * 0.035;
-  camera.position.y += (targetY - camera.position.y) * 0.035;
+  camera.position.x += (targetX - camera.position.x) * 0.03;
+  camera.position.y += (targetY - camera.position.y) * 0.03;
   camera.lookAt(scene.position);
 
   renderer.render(scene, camera);
