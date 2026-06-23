@@ -117,7 +117,12 @@ const updateFlag = (element) => {
   
   // Find img inside parent (works for both custom selects and old selects)
   let img = element.parentElement.querySelector("img");
-  if (img) img.src = newSrc;
+  if (img) {
+    img.style.display = 'block';
+    img.src = newSrc;
+    let fallback = element.parentElement.querySelector(".flag-fallback");
+    if (fallback) fallback.style.display = 'none';
+  }
   
   // Also update custom select trigger text if custom select is used
   let triggerText = element.parentElement.querySelector(".selected-text");
@@ -1071,7 +1076,12 @@ function initCustomSelects() {
           customOpt.classList.add("selected");
           // Initialize trigger values
           const flagImg = trigger.querySelector("img");
-          if (flagImg) flagImg.src = `https://flagsapi.com/${countryCode}/flat/64.png`;
+          if (flagImg) {
+            flagImg.style.display = 'block';
+            flagImg.src = `https://flagsapi.com/${countryCode}/flat/64.png`;
+            let fallback = trigger.querySelector(".flag-fallback");
+            if (fallback) fallback.style.display = 'none';
+          }
           const textEl = trigger.querySelector(".selected-text");
           if (textEl) textEl.textContent = currCode;
         }
@@ -1110,7 +1120,8 @@ function initCustomSelects() {
         container.classList.add("active");
         searchInput.value = "";
         filterList("");
-        searchInput.focus();
+        // Smooth focus transition
+        setTimeout(() => searchInput.focus(), 60);
       }
     });
     
@@ -1278,5 +1289,52 @@ function initNavIndicator() {
   // Small delay on load to ensure fonts and layouts are fully settled
   setTimeout(resetToActive, 150);
 }
+
+// ========== Flag Image Loading Fallback Initials Badge ==========
+function handleFlagError(img, currencyCode) {
+  const countryCode = countryList[currencyCode] || currencyCode.substring(0, 2);
+  const rect = img.getBoundingClientRect();
+  const width = rect.width || img.clientWidth || 24;
+  const height = rect.height || img.clientHeight || 24;
+  
+  img.style.display = 'none';
+  
+  let fallback = img.parentElement.querySelector(".flag-fallback");
+  if (!fallback) {
+    fallback = document.createElement("div");
+    fallback.className = "flag-fallback";
+    fallback.textContent = countryCode;
+    fallback.style.width = `${width}px`;
+    fallback.style.height = `${height}px`;
+    fallback.style.lineHeight = `${height - 3}px`;
+    
+    // Choose gradient based on characters in code to keep them consistent
+    const hue = (currencyCode.charCodeAt(0) * 15 + currencyCode.charCodeAt(1) * 20) % 360;
+    fallback.style.background = `linear-gradient(135deg, hsl(${hue}, 85%, 65%), hsl(${(hue + 45) % 360}, 85%, 50%))`;
+    
+    img.parentElement.insertBefore(fallback, img);
+  } else {
+    fallback.style.display = 'inline-flex';
+  }
+}
+
+// Intercept all flag loading errors on the document
+window.addEventListener('error', (e) => {
+  if (e.target && e.target.tagName === 'IMG' && e.target.src && e.target.src.includes('flagsapi.com')) {
+    let currencyCode = 'US';
+    const parent = e.target.parentElement;
+    if (parent) {
+      const textEl = parent.querySelector('.selected-text, .option-code, span, h4');
+      if (textEl) {
+        currencyCode = textEl.textContent.trim().substring(0, 3);
+      } else {
+        const alt = e.target.getAttribute('alt') || '';
+        const match = alt.match(/[A-Z]{3}/);
+        if (match) currencyCode = match[0];
+      }
+    }
+    handleFlagError(e.target, currencyCode);
+  }
+}, true);
 
 

@@ -96,12 +96,18 @@ body {
   position: relative;
   overflow-x: hidden;
   line-height: 1.5;
-  transition: background var(--transition-slow), color var(--transition-normal);
+  transition: background var(--transition-slow), color var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+/* Enable smooth transitions on interactive cards and layouts during theme switch */
+body, .container, .comparison-container, .trend-container, .navbar, .faq-item, .comparison-card, .history-item, .custom-select-trigger, input, select, .currency-chip {
+  transition: background var(--transition-slow), border-color var(--transition-normal), color var(--transition-normal), box-shadow var(--transition-normal), transform var(--transition-fast);
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -111,15 +117,13 @@ body {
 ::-webkit-scrollbar-thumb {
   background: var(--divider);
   border-radius: 10px;
-  border: 2px solid transparent;
+  border: 1px solid transparent;
   background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
+  background: var(--primary);
   border-radius: 10px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
 }
 
 /* ==========================================
@@ -509,7 +513,18 @@ h2 {
   box-shadow: var(--card-shadow);
   border-radius: 2.5rem;
   width: 100%;
-  transition: all var(--transition-normal);
+  transition: background var(--transition-slow), border-color var(--transition-normal), box-shadow var(--transition-normal), transform var(--transition-normal);
+}
+
+.container:hover, .comparison-container:hover {
+  transform: translateY(-4px);
+  border-color: rgba(99, 102, 241, 0.25);
+  box-shadow: 0 30px 60px -15px rgba(15, 23, 42, 0.08), 0 0 1px rgba(99, 102, 241, 0.2);
+}
+
+body.dark-theme .container:hover, body.dark-theme .comparison-container:hover {
+  border-color: rgba(129, 140, 248, 0.25);
+  box-shadow: 0 30px 65px -15px rgba(0, 0, 0, 0.55), 0 0 1px rgba(129, 140, 248, 0.3);
 }
 
 /* ==========================================
@@ -668,17 +683,18 @@ h2 {
   font-size: 1.15rem;
   font-weight: 600;
   outline: none;
-  transition: all var(--transition-normal);
+  transition: border-color var(--transition-normal), background var(--transition-normal), box-shadow var(--transition-normal), transform var(--transition-fast);
 }
 
 .input-wrapper input:focus {
   border-color: var(--input-focus-border);
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 0 20px var(--primary-glow);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 8px 25px var(--primary-glow), 0 0 0 1px var(--input-focus-border);
+  transform: translateY(-1px);
 }
 
 body.dark-theme .input-wrapper input:focus {
-  background: rgba(15, 23, 42, 0.9);
+  background: rgba(15, 23, 42, 0.95);
 }
 
 /* Dropdowns layout */
@@ -888,18 +904,32 @@ form button[type="submit"]:active {
   align-items: center;
   background: var(--input-bg);
   border: 1px solid var(--card-border);
+  border-left: 3px solid transparent;
   padding: 0.8rem 1.2rem;
   border-radius: 1rem;
   font-size: 0.95rem;
   font-weight: 500;
-  transition: all var(--transition-normal);
-  animation: fadeIn 0.3s ease-out;
+  transition: all var(--transition-normal), border-left-color var(--transition-fast);
+  animation: historySlideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
 .history-item:hover {
   transform: translateX(4px);
   border-color: var(--primary);
+  border-left-color: var(--primary);
   background: var(--card-bg);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+@keyframes historySlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .history-item .history-details {
@@ -1113,8 +1143,22 @@ form button[type="submit"]:active {
   border-radius: 1.5rem;
   padding: 1.5rem;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.02);
-  transition: all var(--transition-normal);
+  transition: background var(--transition-slow), border-color var(--transition-normal), box-shadow var(--transition-normal), transform var(--transition-normal);
   animation: scaleInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  position: relative;
+  overflow: hidden;
+}
+
+.comparison-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: var(--primary-gradient);
+  opacity: 0;
+  transition: opacity var(--transition-normal);
 }
 
 .comparison-card:hover {
@@ -1122,6 +1166,10 @@ form button[type="submit"]:active {
   border-color: var(--primary);
   box-shadow: 0 15px 35px var(--primary-glow);
   background: var(--card-bg);
+}
+
+.comparison-card:hover::before {
+  opacity: 1;
 }
 
 .card-header {
@@ -1834,14 +1882,14 @@ body.dark-theme .trend-container:hover {
   background: rgba(15, 23, 42, 0.85);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--primary-glow);
   padding: 0.55rem 0.9rem;
   border-radius: 0.75rem;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25), 0 0 1px rgba(255,255,255,0.2);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15), 0 0 15px var(--primary-glow);
   z-index: 100;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.2s ease, transform 0.1s ease;
+  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), left 0.15s cubic-bezier(0.25, 1, 0.5, 1), top 0.15s cubic-bezier(0.25, 1, 0.5, 1);
   text-align: center;
   min-width: 140px;
 }
@@ -1985,19 +2033,21 @@ body.dark-theme .chart-tooltip {
   border-radius: 1.25rem;
   cursor: pointer;
   user-select: none;
-  transition: all var(--transition-normal);
+  transition: border-color var(--transition-normal), background var(--transition-normal), box-shadow var(--transition-normal), transform var(--transition-fast);
   height: 3.75rem;
 }
 
 .custom-select-trigger:hover {
   border-color: var(--input-focus-border);
-  box-shadow: 0 0 15px var(--primary-glow);
+  box-shadow: 0 8px 20px var(--primary-glow);
+  transform: translateY(-1px);
 }
 
 .custom-select-container.active .custom-select-trigger {
   border-color: var(--input-focus-border);
   background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 0 20px var(--primary-glow);
+  box-shadow: 0 8px 25px var(--primary-glow);
+  transform: translateY(-1px);
 }
 
 body.dark-theme .custom-select-container.active .custom-select-trigger {
@@ -2046,7 +2096,8 @@ body.dark-theme .custom-select-container.active .custom-select-trigger {
   z-index: 1000;
   opacity: 0;
   visibility: hidden;
-  transform: translateY(-10px);
+  transform: translateY(-10px) scale(0.95);
+  transform-origin: top center;
   transition: opacity var(--transition-normal), transform var(--transition-normal), visibility var(--transition-normal);
   overflow: hidden;
 }
@@ -2054,7 +2105,7 @@ body.dark-theme .custom-select-container.active .custom-select-trigger {
 .custom-select-container.active .custom-select-menu {
   opacity: 1;
   visibility: visible;
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
 }
 
 .search-wrapper {
@@ -2330,4 +2381,21 @@ body.dark-theme .custom-option:hover {
 
 #chartTrackerDot {
   animation: trackerDotPulse 2s infinite ease-in-out;
+}
+
+/* Flag image loading error fallback initials badge style */
+.flag-fallback {
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 0.75rem;
+  color: #ffffff;
+  border: 1.5px solid var(--card-border);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  text-transform: uppercase;
+  flex-shrink: 0;
+  box-sizing: border-box;
 }
