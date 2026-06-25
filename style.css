@@ -1388,24 +1388,24 @@ form button[type="submit"]:active {
   -webkit-backdrop-filter: blur(25px);
   border-top: 1px solid var(--card-border);
   color: var(--text-main);
-  padding: 5rem 2rem 2rem;
+  padding: 3rem 2rem 1.5rem;
   position: relative;
-  margin-top: 5rem;
+  margin-top: 3.5rem;
 }
 
 .footer-content {
   max-width: 1200px;
-  margin: 0 auto 3rem;
+  margin: 0 auto 2rem;
   display: grid;
   grid-template-columns: 1.5fr 1fr 1.2fr;
-  gap: 4rem;
+  gap: 2.5rem;
 }
 
 .footer-section h3 {
   font-family: var(--font-heading);
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 800;
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.75rem;
   color: var(--primary);
   display: flex;
   align-items: center;
@@ -1418,16 +1418,16 @@ form button[type="submit"]:active {
 
 .footer-section h4 {
   font-family: var(--font-heading);
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   font-weight: 800;
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.75rem;
   color: var(--text-main);
 }
 
 .footer-section p {
   color: var(--text-muted);
-  line-height: 1.6;
-  font-size: 0.95rem;
+  line-height: 1.5;
+  font-size: 0.88rem;
 }
 
 .footer-section ul {
@@ -1435,7 +1435,7 @@ form button[type="submit"]:active {
 }
 
 .footer-section ul li {
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.45rem;
 }
 
 .footer-section ul li a {
@@ -1444,7 +1444,7 @@ form button[type="submit"]:active {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.95rem;
+  font-size: 0.88rem;
   font-weight: 500;
   transition: all var(--transition-normal);
 }
@@ -1455,19 +1455,19 @@ form button[type="submit"]:active {
 }
 
 .footer-section ul li i {
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   color: var(--primary);
 }
 
 .social-links {
   display: flex;
-  gap: 0.75rem;
-  margin-top: 1.5rem;
+  gap: 0.6rem;
+  margin-top: 1rem;
 }
 
 .social-links a {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: var(--input-bg);
   border: 1px solid var(--input-border);
@@ -1475,7 +1475,7 @@ form button[type="submit"]:active {
   align-items: center;
   justify-content: center;
   color: var(--text-muted);
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   transition: all var(--transition-normal);
   text-decoration: none;
 }
@@ -1489,8 +1489,8 @@ form button[type="submit"]:active {
 }
 
 .api-credit {
-  margin-top: 1.25rem;
-  font-size: 0.85rem;
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
   color: var(--text-muted);
 }
 
@@ -1508,7 +1508,7 @@ form button[type="submit"]:active {
   border-top: 1px solid var(--divider);
   max-width: 1200px;
   margin: 0 auto;
-  padding-top: 2rem;
+  padding-top: 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1517,7 +1517,7 @@ form button[type="submit"]:active {
 
 .footer-bottom p {
   color: var(--text-muted);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 .fa-heart {
@@ -1534,8 +1534,8 @@ form button[type="submit"]:active {
 
 /* Scroll to top button */
 .scroll-to-top {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: var(--primary-gradient);
   color: #ffffff;
@@ -1597,7 +1597,7 @@ form button[type="submit"]:active {
   }
   .footer-content {
     grid-template-columns: 1.2fr 1fr;
-    gap: 3rem;
+    gap: 2rem;
   }
   .footer-section:last-child {
     grid-column: 1 / -1;
@@ -1710,12 +1710,12 @@ form button[type="submit"]:active {
 
   .footer-content {
     grid-template-columns: 1fr;
-    gap: 2.5rem;
+    gap: 1.75rem;
   }
 
   .footer-bottom {
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
     text-align: center;
   }
 }
