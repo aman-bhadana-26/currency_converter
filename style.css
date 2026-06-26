@@ -219,8 +219,17 @@ body, .container, .comparison-container, .trend-container, .navbar, .faq-item, .
   border: 1px solid var(--card-border);
   border-radius: 100px;
   box-shadow: var(--card-shadow);
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              top 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              width 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              background var(--transition-normal),
+              border-color var(--transition-normal),
+              box-shadow var(--transition-normal);
   animation: slideDown 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.navbar.navbar-hidden {
+  transform: translate(-50%, -135%);
 }
 
 /* Shrink navbar when scrolled */
@@ -340,19 +349,36 @@ body.dark-theme .navbar.scrolled {
   border-radius: 50px;
   background: var(--primary-glow);
   border: 1px solid rgba(99, 102, 241, 0.12);
-  transition: left 0.38s cubic-bezier(0.25, 1, 0.5, 1),
-              top 0.38s cubic-bezier(0.25, 1, 0.5, 1),
-              width 0.38s cubic-bezier(0.25, 1, 0.5, 1),
-              height 0.38s cubic-bezier(0.25, 1, 0.5, 1),
+  box-shadow: 0 4px 12px var(--primary-glow);
+  transition: left 0.32s cubic-bezier(0.25, 1, 0.5, 1),
+              top 0.32s cubic-bezier(0.25, 1, 0.5, 1),
+              width 0.32s cubic-bezier(0.25, 1, 0.5, 1),
+              height 0.32s cubic-bezier(0.25, 1, 0.5, 1),
               opacity 0.25s ease;
   pointer-events: none;
   z-index: 0;
   opacity: 0;
 }
 
+/* Elastic stretching when moving left or right */
+.nav-indicator-pill.moving-right {
+  transition: left 0.38s cubic-bezier(0.5, 1.5, 0.5, 1) 0.04s,
+              width 0.28s cubic-bezier(0.15, 0.85, 0.35, 1.2),
+              top 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+              height 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.nav-indicator-pill.moving-left {
+  transition: left 0.28s cubic-bezier(0.15, 0.85, 0.35, 1.2),
+              width 0.38s cubic-bezier(0.5, 1.5, 0.5, 1) 0.04s,
+              top 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+              height 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
 body.dark-theme .nav-indicator-pill {
   background: rgba(129, 140, 248, 0.12);
   border-color: rgba(129, 140, 248, 0.2);
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.1);
 }
 
 .nav-link {
@@ -369,6 +395,28 @@ body.dark-theme .nav-indicator-pill {
   transition: color var(--transition-normal);
   position: relative;
   z-index: 1; /* Place text above the sliding indicator */
+  overflow: hidden; /* to contain click ripples */
+}
+
+/* Ripple Element Styling */
+.nav-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(99, 102, 241, 0.25);
+  transform: scale(0);
+  animation: navRippleAnim 0.5s cubic-bezier(0.1, 0.8, 0.3, 1) both;
+  pointer-events: none;
+  z-index: 0;
+}
+body.dark-theme .nav-ripple {
+  background: rgba(129, 140, 248, 0.3);
+}
+
+@keyframes navRippleAnim {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
 }
 
 .nav-link i {
@@ -381,9 +429,49 @@ body.dark-theme .nav-indicator-pill {
   color: var(--text-main);
 }
 
-.nav-link:hover i {
-  transform: translateY(-2px) scale(1.2);
+/* Nav Link Icons Micro-Animations */
+.nav-link:hover i.fa-house {
+  animation: nav-home-wiggle 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
   color: var(--primary);
+}
+.nav-link:hover i.fa-arrows-rotate {
+  animation: nav-converter-spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) both;
+  color: var(--primary);
+}
+.nav-link:hover i.fa-chart-line {
+  animation: nav-compare-pulse 0.6s ease-in-out both;
+  color: var(--primary);
+}
+.nav-link:hover i.fa-circle-question {
+  animation: nav-faq-nod 0.6s ease-in-out both;
+  color: var(--primary);
+}
+.nav-link:hover i.fa-circle-info {
+  animation: nav-about-flip 0.8s cubic-bezier(0.4, 0, 0.2, 1) both;
+  color: var(--primary);
+}
+
+@keyframes nav-home-wiggle {
+  0%, 100% { transform: rotate(0deg) scale(1.2); }
+  25% { transform: rotate(-15deg) scale(1.2); }
+  75% { transform: rotate(15deg) scale(1.2); }
+}
+@keyframes nav-converter-spin {
+  0% { transform: rotate(0deg) scale(1.2); }
+  100% { transform: rotate(360deg) scale(1.2); }
+}
+@keyframes nav-compare-pulse {
+  0%, 100% { transform: translateY(0) scale(1.2); }
+  50% { transform: translateY(-4px) scale(1.3); }
+}
+@keyframes nav-faq-nod {
+  0%, 100% { transform: rotate(0deg) scale(1.2); }
+  30% { transform: rotate(-12deg) scale(1.2); }
+  70% { transform: rotate(12deg) scale(1.2); }
+}
+@keyframes nav-about-flip {
+  0% { transform: rotateY(0deg) scale(1.2); }
+  100% { transform: rotateY(360deg) scale(1.2); }
 }
 
 .nav-link.active {
@@ -429,6 +517,25 @@ body.dark-theme .nav-indicator-pill {
 
 body.dark-theme .theme-toggle i {
   color: #818cf8;
+}
+
+.theme-toggle.toggling i {
+  animation: toggleSpinScale 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes toggleSpinScale {
+  0% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.1) rotate(180deg);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.2) rotate(360deg);
+    opacity: 1;
+  }
 }
 
 /* Hamburger mobile button */
@@ -1643,7 +1750,24 @@ form button[type="submit"]:active {
     width: 100%;
     border-radius: 14px;
     padding: 0.75rem 1.25rem;
+    transform: translateX(50px);
+    opacity: 0;
+    transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+                opacity 0.45s ease,
+                color var(--transition-normal);
   }
+
+  .nav-menu.active .nav-link {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  /* Staggered delay for each menu item (Note: indicator pill is child 1) */
+  .nav-menu.active .nav-link:nth-child(2) { transition-delay: 0.05s; }
+  .nav-menu.active .nav-link:nth-child(3) { transition-delay: 0.1s; }
+  .nav-menu.active .nav-link:nth-child(4) { transition-delay: 0.15s; }
+  .nav-menu.active .nav-link:nth-child(5) { transition-delay: 0.2s; }
+  .nav-menu.active .nav-link:nth-child(6) { transition-delay: 0.25s; }
 
   .navbar, .navbar.scrolled {
     top: 1rem;

@@ -36,16 +36,30 @@ document.addEventListener("click", (e) => {
   }
 });
 
+let lastScrollY = window.scrollY;
+
 // Add active state to nav links based on scroll position and trigger floating navbar scroll effects
 window.addEventListener("scroll", () => {
   const navbar = document.querySelector(".navbar");
+  const currentScrollY = window.scrollY;
+
   if (navbar) {
-    if (window.scrollY > 30) {
+    if (currentScrollY > 30) {
       navbar.classList.add("scrolled");
     } else {
       navbar.classList.remove("scrolled");
     }
+
+    // Scroll-direction aware hide/show navbar (disabled if mobile hamburger menu is open)
+    const isMobileMenuOpen = hamburger && hamburger.classList.contains("active");
+    if (currentScrollY > lastScrollY && currentScrollY > 120 && !isMobileMenuOpen) {
+      navbar.classList.add("navbar-hidden");
+    } else {
+      navbar.classList.remove("navbar-hidden");
+    }
   }
+
+  lastScrollY = currentScrollY;
 
   const sections = document.querySelectorAll(".section, .footer");
   const navLinks = document.querySelectorAll(".nav-link");
@@ -53,7 +67,6 @@ window.addEventListener("scroll", () => {
   let current = "";
   sections.forEach((section) => {
     const sectionTop = section.offsetTop;
-    const sectionHeight = section.clientHeight;
     if (window.pageYOffset >= sectionTop - 150) {
       current = section.getAttribute("id");
     }
@@ -178,22 +191,29 @@ if (currentTheme === "dark") {
 
 // Toggle theme on button click
 themeToggle.addEventListener("click", () => {
-  body.classList.toggle("dark-theme");
-  const isDark = body.classList.contains("dark-theme");
+  themeToggle.classList.add("toggling");
 
-  // Update icon
-  if (isDark) {
-    themeIcon.classList.remove("fa-moon");
-    themeIcon.classList.add("fa-sun");
-    localStorage.setItem("theme", "dark");
-  } else {
-    themeIcon.classList.remove("fa-sun");
-    themeIcon.classList.add("fa-moon");
-    localStorage.setItem("theme", "light");
-  }
+  // Mid-point of the animation (225ms) to swap icons when scale is 0
+  setTimeout(() => {
+    body.classList.toggle("dark-theme");
+    const isDark = body.classList.contains("dark-theme");
 
-  // Shift 3D canvas rendering colors
-  update3DColors(isDark);
+    if (isDark) {
+      themeIcon.className = "fa-solid fa-sun";
+      localStorage.setItem("theme", "dark");
+    } else {
+      themeIcon.className = "fa-solid fa-moon";
+      localStorage.setItem("theme", "light");
+    }
+
+    // Shift 3D canvas rendering colors
+    update3DColors(isDark);
+  }, 225);
+
+  // Remove toggling class after animation finishes
+  setTimeout(() => {
+    themeToggle.classList.remove("toggling");
+  }, 450);
 });
 
 // ========== Multi-Currency Comparison Feature ==========
@@ -1316,16 +1336,38 @@ function initNavIndicator() {
   
   if (!navMenu || !pill || links.length === 0) return;
   
+  let lastLeft = 0;
+  let clearClassTimeout = null;
+
   function updatePillPosition(link) {
     pill.style.opacity = "1";
-    pill.style.left = `${link.offsetLeft}px`;
+    const newLeft = link.offsetLeft;
+    
+    // Clear any previous timeouts
+    if (clearClassTimeout) clearTimeout(clearClassTimeout);
+    
+    // Detect movement direction for stretchy/elastic effect
+    if (newLeft > lastLeft) {
+      pill.classList.remove("moving-left");
+      pill.classList.add("moving-right");
+    } else if (newLeft < lastLeft) {
+      pill.classList.remove("moving-right");
+      pill.classList.add("moving-left");
+    }
+    lastLeft = newLeft;
+    
+    pill.style.left = `${newLeft}px`;
     pill.style.top = `${link.offsetTop}px`;
     pill.style.width = `${link.offsetWidth}px`;
     pill.style.height = `${link.offsetHeight}px`;
+    
+    // Remove movement classes after transition finishes
+    clearClassTimeout = setTimeout(() => {
+      pill.classList.remove("moving-left", "moving-right");
+    }, 450);
   }
   
   function resetToActive() {
-    // Only show the pill if the screen size is not too small, or let it work vertically too
     const activeLink = navMenu.querySelector(".nav-link.active");
     if (activeLink) {
       updatePillPosition(activeLink);
@@ -1338,6 +1380,27 @@ function initNavIndicator() {
   links.forEach(link => {
     link.addEventListener("mouseenter", () => {
       updatePillPosition(link);
+    });
+    
+    // Premium click ripple effect
+    link.addEventListener("click", function(e) {
+      const ripple = document.createElement("span");
+      ripple.className = "nav-ripple";
+      
+      const rect = this.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      ripple.style.width = ripple.style.height = `${size}px`;
+      
+      const x = e.clientX - rect.left - size / 2;
+      const y = e.clientY - rect.top - size / 2;
+      ripple.style.left = `${x}px`;
+      ripple.style.top = `${y}px`;
+      
+      this.appendChild(ripple);
+      
+      setTimeout(() => {
+        ripple.remove();
+      }, 550);
     });
   });
   
@@ -1352,7 +1415,6 @@ function initNavIndicator() {
   window.addEventListener("resize", resetToActive);
   
   // Monitor active link change via MutationObserver
-  // The scroll listener in app.js toggles ".active" class on links
   const observer = new MutationObserver(() => {
     resetToActive();
   });
