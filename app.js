@@ -6,11 +6,56 @@ const fromCurr = document.querySelector(".from select");
 const toCurr = document.querySelector(".to select");
 const msg = document.querySelector(".msg");
 
-// ========== Navigation Menu Toggle ==========
+// ========== Navigation Menu Toggle & Interactive Pill Sliding ==========
 
 const hamburger = document.getElementById("hamburger");
 const navMenu = document.getElementById("navMenu");
 const navLinks = document.querySelectorAll(".nav-link");
+const indicatorPill = document.getElementById("navIndicatorPill");
+let lastActiveIndex = -1;
+let isHoveringNav = false;
+
+// Function to dynamically update the indicator pill position
+const updateIndicator = (targetLink) => {
+  if (!indicatorPill || !targetLink || !navMenu) return;
+  
+  const menuRect = navMenu.getBoundingClientRect();
+  const linkRect = targetLink.getBoundingClientRect();
+  
+  // Calculate relative positions
+  const left = linkRect.left - menuRect.left;
+  const top = linkRect.top - menuRect.top;
+  const width = linkRect.width;
+  const height = linkRect.height;
+  
+  // Determine direction for elastic stretch animation
+  const allLinksArray = Array.from(navLinks);
+  const targetIndex = allLinksArray.indexOf(targetLink);
+  
+  if (lastActiveIndex !== -1 && targetIndex !== lastActiveIndex) {
+    if (targetIndex > lastActiveIndex) {
+      indicatorPill.classList.add("moving-right");
+      indicatorPill.classList.remove("moving-left");
+    } else {
+      indicatorPill.classList.add("moving-left");
+      indicatorPill.classList.remove("moving-right");
+    }
+  }
+  
+  lastActiveIndex = targetIndex;
+  
+  // Apply position styles
+  indicatorPill.style.left = `${left}px`;
+  indicatorPill.style.top = `${top}px`;
+  indicatorPill.style.width = `${width}px`;
+  indicatorPill.style.height = `${height}px`;
+  indicatorPill.style.opacity = "1";
+  
+  // Remove elastic classes after transition completes
+  setTimeout(() => {
+    indicatorPill.classList.remove("moving-right", "moving-left");
+  }, 400);
+};
 
 // Toggle mobile menu
 if (hamburger) {
@@ -30,10 +75,74 @@ navLinks.forEach(link => {
 
 // Close mobile menu when clicking outside
 document.addEventListener("click", (e) => {
-  if (!navMenu.contains(e.target) && !hamburger.contains(e.target)) {
+  if (navMenu && hamburger && !navMenu.contains(e.target) && !hamburger.contains(e.target)) {
     hamburger.classList.remove("active");
     navMenu.classList.remove("active");
   }
+});
+
+// Align indicator on hover & leave, and trigger click ripple
+navLinks.forEach(link => {
+  link.addEventListener("mouseenter", (e) => {
+    isHoveringNav = true;
+    updateIndicator(e.currentTarget);
+  });
+  
+  link.addEventListener("mouseleave", () => {
+    isHoveringNav = false;
+    const activeLink = navMenu.querySelector(".nav-link.active");
+    if (activeLink) {
+      updateIndicator(activeLink);
+    } else {
+      if (indicatorPill) indicatorPill.style.opacity = "0";
+    }
+  });
+
+  // Ripple effect on click for nav links
+  link.addEventListener("click", function(e) {
+    // Remove any existing ripples inside this link
+    const existingRipples = this.querySelectorAll(".nav-ripple");
+    existingRipples.forEach(r => r.remove());
+
+    const ripple = document.createElement("span");
+    ripple.classList.add("nav-ripple");
+    
+    const rect = this.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    
+    ripple.style.width = ripple.style.height = `${size}px`;
+    ripple.style.left = `${e.clientX - rect.left - size / 2}px`;
+    ripple.style.top = `${e.clientY - rect.top - size / 2}px`;
+    
+    this.appendChild(ripple);
+    
+    // Remove after animation completes
+    setTimeout(() => {
+      ripple.remove();
+    }, 500);
+  });
+});
+
+// Window resize handler to reposition indicator instantly
+window.addEventListener("resize", () => {
+  const activeLink = navMenu ? navMenu.querySelector(".nav-link.active") : null;
+  if (activeLink && indicatorPill) {
+    indicatorPill.style.transition = "none";
+    updateIndicator(activeLink);
+    // force reflow
+    indicatorPill.offsetHeight;
+    indicatorPill.style.transition = "";
+  }
+});
+
+// Run initial alignment on load
+window.addEventListener("DOMContentLoaded", () => {
+  setTimeout(() => {
+    const activeLink = navMenu ? (navMenu.querySelector(".nav-link.active") || navLinks[0]) : null;
+    if (activeLink) {
+      updateIndicator(activeLink);
+    }
+  }, 300);
 });
 
 let lastScrollY = window.scrollY;
@@ -62,7 +171,7 @@ window.addEventListener("scroll", () => {
   lastScrollY = currentScrollY;
 
   const sections = document.querySelectorAll(".section, .footer");
-  const navLinks = document.querySelectorAll(".nav-link");
+  const currentNavLinks = document.querySelectorAll(".nav-link");
 
   let current = "";
   sections.forEach((section) => {
@@ -72,12 +181,18 @@ window.addEventListener("scroll", () => {
     }
   });
 
-  navLinks.forEach((link) => {
+  let activeLink = null;
+  currentNavLinks.forEach((link) => {
     link.classList.remove("active");
     if (link.getAttribute("href") === `#${current}`) {
       link.classList.add("active");
+      activeLink = link;
     }
   });
+
+  if (activeLink && !isHoveringNav) {
+    updateIndicator(activeLink);
+  }
 });
 
 // ========== Currency Converter ==========
