@@ -174,7 +174,10 @@
                         </div>
                     </div>
                     
-                    <div class="msg">1 USD = 83.50 INR</div>
+                    <div class="msg-container">
+                        <div class="msg">1 USD = 83.50 INR</div>
+                        <div class="rate-status" id="rateStatus"><i class="fa-solid fa-circle-check"></i> Live Rates</div>
+                    </div>
                     
                     <button type="submit">
                         <span>Get Exchange Rate</span>
@@ -204,6 +207,8 @@
                     <div class="timeframe-selector">
                         <button class="timeframe-btn active" data-timeframe="7D">7D</button>
                         <button class="timeframe-btn" data-timeframe="30D">30D</button>
+                        <button class="timeframe-btn" data-timeframe="90D">90D</button>
+                        <button class="timeframe-btn" data-timeframe="1Y">1Y</button>
                     </div>
                 </div>
 

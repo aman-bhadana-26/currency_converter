@@ -216,6 +216,51 @@ for (let select of dropdowns) {
   });
 }
 
+const CACHE_DURATION = 60 * 60 * 1000; // 1 hour
+
+const fetchExchangeRates = async (baseCurrency) => {
+  const cacheKey = `rates_cache_${baseCurrency}`;
+  const cachedDataStr = localStorage.getItem(cacheKey);
+
+  if (cachedDataStr) {
+    try {
+      const cached = JSON.parse(cachedDataStr);
+      const age = Date.now() - cached.timestamp;
+      if (age < CACHE_DURATION) {
+        return { data: cached.data, isCached: true, timestamp: cached.timestamp };
+      }
+    } catch (e) {
+      console.warn("Error parsing rates cache, refetching...", e);
+    }
+  }
+
+  const URL = `${BASE_URL}/${baseCurrency}`;
+  const response = await fetch(URL);
+  const data = await response.json();
+
+  const cacheObj = {
+    timestamp: Date.now(),
+    data: data
+  };
+  localStorage.setItem(cacheKey, JSON.stringify(cacheObj));
+
+  return { data, isCached: false, timestamp: cacheObj.timestamp };
+};
+
+const updateRateStatusBadge = (isCached, timestamp) => {
+  const statusEl = document.getElementById("rateStatus");
+  if (!statusEl) return;
+
+  if (isCached) {
+    statusEl.className = "rate-status cached";
+    const timeStr = new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    statusEl.innerHTML = `<i class="fa-solid fa-clock"></i> Cached (at ${timeStr})`;
+  } else {
+    statusEl.className = "rate-status live";
+    statusEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> Live Rates`;
+  }
+};
+
 const updateExchangeRate = async () => {
   let amount = document.querySelector(".amount input");
   let amtVal = amount.value;
@@ -223,19 +268,30 @@ const updateExchangeRate = async () => {
     amtVal = 1;
     amount.value = "1";
   }
-  const URL = `${BASE_URL}/${fromCurr.value}`;
-  let response = await fetch(URL);
-  let data = await response.json();
-  let rate = data.rates[toCurr.value];
 
-  let finalAmount = (amtVal * rate).toFixed(2);
-  msg.innerText = `${amtVal} ${fromCurr.value} = ${finalAmount} ${toCurr.value}`;
+  try {
+    const { data, isCached, timestamp } = await fetchExchangeRates(fromCurr.value);
+    let rate = data.rates[toCurr.value];
 
-  // Save the conversion to local storage history list
-  saveConversionToHistory(fromCurr.value, toCurr.value, amtVal, finalAmount);
+    let finalAmount = (amtVal * rate).toFixed(2);
+    msg.innerText = `${amtVal} ${fromCurr.value} = ${finalAmount} ${toCurr.value}`;
 
-  // Update the interactive rate trend chart
-  updateTrendChart(fromCurr.value, toCurr.value, rate);
+    updateRateStatusBadge(isCached, timestamp);
+
+    // Save the conversion to local storage history list
+    saveConversionToHistory(fromCurr.value, toCurr.value, amtVal, finalAmount);
+
+    // Update the interactive rate trend chart
+    updateTrendChart(fromCurr.value, toCurr.value, rate);
+  } catch (error) {
+    console.error("Error updating exchange rate:", error);
+    msg.innerText = "Error fetching rates.";
+    const statusEl = document.getElementById("rateStatus");
+    if (statusEl) {
+      statusEl.className = "rate-status";
+      statusEl.innerHTML = `<i class="fa-solid fa-circle-exclamation" style="color: #ef4444;"></i> Fetch Error`;
+    }
+  }
 };
 
 const updateFlag = (element) => {
@@ -428,9 +484,7 @@ async function compareRates() {
   comparisonResults.style.display = "block";
 
   try {
-    const URL = `${BASE_URL}/${baseCurrency}`;
-    const response = await fetch(URL);
-    const data = await response.json();
+    const { data } = await fetchExchangeRates(baseCurrency);
 
     // Create result cards
     resultsGrid.innerHTML = "";
@@ -905,6 +959,18 @@ const frankfurterCurrencies = new Set([
   "NOK", "NZD", "PHP", "PLN", "RON", "SEK", "SGD", "THB", "TRY", "USD", "ZAR"
 ]);
 
+const downsampleData = (dataPoints, targetCount = 30) => {
+  if (dataPoints.length <= targetCount) return dataPoints;
+  const step = dataPoints.length / (targetCount - 1);
+  const result = [];
+  for (let i = 0; i < targetCount - 1; i++) {
+    const index = Math.round(i * step);
+    result.push(dataPoints[index]);
+  }
+  result.push(dataPoints[dataPoints.length - 1]);
+  return result;
+};
+
 async function updateTrendChart(from, to, currentRate) {
   activeFromCurrency = from;
   activeToCurrency = to;
@@ -913,7 +979,11 @@ async function updateTrendChart(from, to, currentRate) {
   const wrapper = document.querySelector(".chart-wrapper");
   if (wrapper) wrapper.classList.add("loading");
 
-  const days = trendTimeframe === "7D" ? 7 : 30;
+  let days = 7;
+  if (trendTimeframe === "30D") days = 30;
+  else if (trendTimeframe === "90D") days = 90;
+  else if (trendTimeframe === "1Y") days = 365;
+
   let dataPoints = [];
   let fetchSuccess = false;
   const isRealDataPossible = frankfurterCurrencies.has(from) && frankfurterCurrencies.has(to) && (from !== to);
@@ -933,7 +1003,8 @@ async function updateTrendChart(from, to, currentRate) {
     dataPoints = generateSimulatedRates(from, to, days, currentRate);
   }
 
-  drawTrendChart(from, to, dataPoints);
+  const sampledPoints = downsampleData(dataPoints, 30);
+  drawTrendChart(from, to, sampledPoints);
   if (wrapper) wrapper.classList.remove("loading");
 }
 
@@ -1246,6 +1317,46 @@ function initCustomSelects() {
     
     if (!select || !trigger || !menu || !searchInput || !optionsWrapper) return;
     
+    let highlightedIndex = -1;
+    
+    const getVisibleOptions = () => {
+      return Array.from(optionsWrapper.querySelectorAll(".custom-option")).filter(
+        opt => opt.style.display !== "none"
+      );
+    };
+
+    const setHighlightedOption = (index) => {
+      const visibleOpts = getVisibleOptions();
+      optionsWrapper.querySelectorAll(".custom-option").forEach(opt => {
+        opt.classList.remove("highlighted");
+      });
+
+      if (index < 0 || visibleOpts.length === 0) {
+        highlightedIndex = -1;
+        return;
+      }
+
+      if (index >= visibleOpts.length) {
+        index = visibleOpts.length - 1;
+      }
+      highlightedIndex = index;
+      
+      const targetOpt = visibleOpts[highlightedIndex];
+      targetOpt.classList.add("highlighted");
+      
+      // Scroll option into view within optionsWrapper
+      const wrapperHeight = optionsWrapper.clientHeight;
+      const optionTop = targetOpt.offsetTop;
+      const optionHeight = targetOpt.offsetHeight;
+      const scrollPos = optionsWrapper.scrollTop;
+
+      if (optionTop < scrollPos) {
+        optionsWrapper.scrollTop = optionTop;
+      } else if (optionTop + optionHeight > scrollPos + wrapperHeight) {
+        optionsWrapper.scrollTop = optionTop + optionHeight - wrapperHeight;
+      }
+    };
+    
     const buildOptions = () => {
       optionsWrapper.innerHTML = "";
       const selectOptions = select.querySelectorAll("option");
@@ -1305,6 +1416,11 @@ function initCustomSelects() {
         container.classList.add("active");
         searchInput.value = "";
         filterList("");
+        
+        const visible = getVisibleOptions();
+        const selectedIdx = visible.findIndex(o => o.classList.contains("selected"));
+        setHighlightedOption(selectedIdx >= 0 ? selectedIdx : 0);
+        
         // Smooth focus transition
         setTimeout(() => searchInput.focus(), 60);
       }
@@ -1315,19 +1431,74 @@ function initCustomSelects() {
       e.stopPropagation();
     });
     
+    // Keyboard navigation in searchable options
+    searchInput.addEventListener("keydown", (e) => {
+      const visibleOpts = getVisibleOptions();
+      
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        let nextIdx = highlightedIndex + 1;
+        if (nextIdx >= visibleOpts.length) nextIdx = 0;
+        setHighlightedOption(nextIdx);
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        let prevIdx = highlightedIndex - 1;
+        if (prevIdx < 0) prevIdx = visibleOpts.length - 1;
+        setHighlightedOption(prevIdx);
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        if (highlightedIndex >= 0 && highlightedIndex < visibleOpts.length) {
+          visibleOpts[highlightedIndex].click();
+        }
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        container.classList.remove("active");
+        trigger.focus();
+      }
+    });
+    
     // Filter options on typing
     searchInput.addEventListener("input", (e) => {
       filterList(e.target.value);
+      setHighlightedOption(0);
     });
+    
+    const highlightMatch = (text, term) => {
+      if (!term) return text;
+      const escapedTerm = term.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+      const regex = new RegExp(`(${escapedTerm})`, 'gi');
+      return text.replace(regex, '<mark>$1</mark>');
+    };
     
     const filterList = (query) => {
       const term = query.toLowerCase().trim();
       const options = optionsWrapper.querySelectorAll(".custom-option");
       options.forEach(opt => {
-        const code = opt.querySelector(".option-code").textContent.toLowerCase();
-        const name = opt.querySelector(".option-name").textContent.toLowerCase();
-        if (code.includes(term) || name.includes(term)) {
+        const codeSpan = opt.querySelector(".option-code");
+        const nameSpan = opt.querySelector(".option-name");
+        
+        if (!opt.hasAttribute("data-original-code")) {
+          opt.setAttribute("data-original-code", codeSpan.textContent);
+        }
+        if (!opt.hasAttribute("data-original-name")) {
+          opt.setAttribute("data-original-name", nameSpan.textContent);
+        }
+        
+        const originalCode = opt.getAttribute("data-original-code");
+        const originalName = opt.getAttribute("data-original-name");
+        
+        const matchesCode = originalCode.toLowerCase().includes(term);
+        const matchesName = originalName.toLowerCase().includes(term);
+        
+        if (matchesCode || matchesName) {
           opt.style.display = "flex";
+          if (term !== "") {
+            codeSpan.innerHTML = highlightMatch(originalCode, term);
+            nameSpan.innerHTML = highlightMatch(originalName, term);
+          } else {
+            codeSpan.textContent = originalCode;
+            nameSpan.textContent = originalName;
+          }
         } else {
           opt.style.display = "none";
         }

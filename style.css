@@ -937,6 +937,14 @@ body.dark-theme .input-wrapper input:focus {
 }
 
 /* Message exchange rate box */
+.msg-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2.25rem;
+  width: 100%;
+}
+
 .msg {
   font-family: var(--font-heading);
   font-size: 1.4rem;
@@ -946,14 +954,42 @@ body.dark-theme .input-wrapper input:focus {
   border-radius: 1.25rem;
   background: rgba(99, 102, 241, 0.05);
   border: 1px dashed rgba(99, 102, 241, 0.2);
-  margin-bottom: 2.25rem;
+  margin-bottom: 0.5rem;
   color: var(--primary);
   letter-spacing: -0.2px;
+  width: 100%;
 }
 
 body.dark-theme .msg {
   background: rgba(129, 140, 248, 0.08);
   border-color: rgba(129, 140, 248, 0.3);
+}
+
+.rate-status {
+  font-family: var(--font-heading);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.35rem 0.85rem;
+  border-radius: 50px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  color: var(--text-muted);
+  transition: all var(--transition-fast);
+}
+
+.rate-status.live {
+  color: var(--accent);
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.rate-status.cached {
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.25);
 }
 
 /* Submit Action Button */
@@ -2289,12 +2325,33 @@ body.dark-theme .custom-option:hover {
   background: rgba(129, 140, 248, 0.12);
 }
 
+.custom-option.highlighted {
+  background: rgba(99, 102, 241, 0.15);
+}
+
+body.dark-theme .custom-option.highlighted {
+  background: rgba(129, 140, 248, 0.2);
+}
+
 .custom-option.selected {
   background: var(--primary-glow);
 }
 
 .custom-option.selected .option-code {
   color: var(--primary);
+}
+
+.custom-option mark {
+  background: rgba(99, 102, 241, 0.2);
+  color: var(--primary);
+  font-weight: 700;
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+body.dark-theme .custom-option mark {
+  background: rgba(129, 140, 248, 0.25);
+  color: #ffffff;
 }
 
 /* ==========================================
