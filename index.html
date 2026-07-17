@@ -28,6 +28,8 @@
 
     <!-- Navigation Header -->
     <header class="navbar">
+        <!-- Scroll Progress Bar -->
+        <div class="scroll-progress" id="scrollProgress"></div>
         <div class="nav-container">
             <div class="nav-brand" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
                 <i class="fa-solid fa-rotate"></i>
@@ -117,7 +119,7 @@
 
         <!-- Converter Section -->
         <section id="converter" class="section converter-section">
-            <div class="container">
+            <div class="container reveal">
                 <h2>Currency Converter</h2>
                 <p class="subtitle">Quickly convert between 160+ world currencies with up-to-the-minute exchange rates.</p>
                 
@@ -202,7 +204,7 @@
             </div>
 
             <!-- Interactive Trend Chart Container -->
-            <div class="trend-container" id="trendContainer">
+            <div class="trend-container reveal" id="trendContainer">
                 <div class="trend-header">
                     <div class="trend-title-area">
                         <h3><i class="fa-solid fa-chart-line"></i> <span id="trendTitle">USD to INR Rate Trend</span></h3>
@@ -286,7 +288,7 @@
 
         <!-- Multi-Currency Comparison Section -->
         <section id="comparison-section" class="section comparison-section">
-            <div class="comparison-container">
+            <div class="comparison-container reveal">
                 <h2>Multi-Currency Comparison</h2>
                 <p class="subtitle">Compare a base currency amount with up to 12 popular currencies in real-time.</p>
                 
@@ -344,7 +346,7 @@
 
     <!-- Footer -->
     <footer id="about" class="footer">
-        <div class="footer-content">
+        <div class="footer-content reveal">
             <div class="footer-section">
                 <h3><i class="fa-solid fa-rotate"></i> ApexConvert</h3>
                 <p>ApexConvert is a state-of-the-art currency conversion platform offering lightning-fast exchanges and multi-currency analysis using reliable real-time rates.</p>

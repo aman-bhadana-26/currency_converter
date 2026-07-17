@@ -937,6 +937,39 @@ function animate() {
   renderer.render(scene, camera);
 }
 
+// ========== Scroll Progress Bar & Scroll Reveal Observation ==========
+function initScrollEffects() {
+  // 1. Scroll Progress Bar
+  const progressBar = document.getElementById("scrollProgress");
+  window.addEventListener("scroll", () => {
+    if (!progressBar) return;
+    const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const scrolled = height > 0 ? (winScroll / height) * 100 : 0;
+    progressBar.style.width = scrolled + "%";
+  });
+
+  // 2. Scroll Reveal Observer
+  const revealElements = document.querySelectorAll(".reveal");
+  const observerOptions = {
+    threshold: 0.08,
+    rootMargin: "0px 0px -40px 0px"
+  };
+
+  const revealObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("active");
+        observer.unobserve(entry.target);
+      }
+    });
+  }, observerOptions);
+
+  revealElements.forEach(el => {
+    revealObserver.observe(el);
+  });
+}
+
 // Initializing the system on window load
 window.addEventListener("load", () => {
   init3D();
@@ -944,6 +977,7 @@ window.addEventListener("load", () => {
   initCustomSelects();
   fetchTickerRates();
   initNavIndicator();
+  initScrollEffects();
 });
 
 // ========== Interactive Trend Chart Feature ==========
