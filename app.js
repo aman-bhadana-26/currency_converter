@@ -479,8 +479,30 @@ async function compareRates() {
     return;
   }
 
-  // Show loading state
-  resultsGrid.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading rates...</div>';
+  // Show loading state (skeleton loader screens)
+  let skeletonHtml = "";
+  const skeletonCount = selectedCurrencies.size || 6;
+  for (let i = 0; i < skeletonCount; i++) {
+    skeletonHtml += `
+      <div class="comparison-card skeleton-card">
+        <div class="card-header">
+          <div class="skeleton skeleton-avatar"></div>
+          <div class="skeleton skeleton-title"></div>
+        </div>
+        <div class="card-body">
+          <div class="rate-info">
+            <div class="skeleton skeleton-label"></div>
+            <div class="skeleton skeleton-text"></div>
+          </div>
+          <div class="amount-info">
+            <div class="skeleton skeleton-label"></div>
+            <div class="skeleton skeleton-text"></div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  resultsGrid.innerHTML = skeletonHtml;
   comparisonResults.style.display = "block";
 
   try {

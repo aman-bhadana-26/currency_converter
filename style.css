@@ -2580,3 +2580,80 @@ body.dark-theme .custom-option mark {
   opacity: 1;
   transform: translateY(0) scale(1);
 }
+
+/* ==========================================
+   SKELETON SCREEN LOADING SHIMMER
+   ========================================== */
+.skeleton-card {
+  pointer-events: none;
+}
+
+.skeleton {
+  background: rgba(148, 163, 184, 0.15);
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+body.dark-theme .skeleton {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.08) 20%,
+    rgba(255, 255, 255, 0.18) 60%,
+    transparent 100%
+  );
+  animation: shimmer 1.6s infinite ease-in-out;
+}
+
+body.dark-theme .skeleton::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.03) 20%,
+    rgba(255, 255, 255, 0.08) 60%,
+    transparent 100%
+  );
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.skeleton-avatar {
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50% !important;
+}
+
+.skeleton-title {
+  width: 55px;
+  height: 1.15rem;
+  border-radius: 6px !important;
+}
+
+.skeleton-label {
+  width: 75px;
+  height: 0.65rem;
+  margin-bottom: 0.45rem;
+  border-radius: 4px !important;
+}
+
+.skeleton-text {
+  width: 140px;
+  height: 0.95rem;
+  border-radius: 6px !important;
+}
