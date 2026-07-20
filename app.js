@@ -949,9 +949,10 @@ function animate() {
   lineGeo.attributes.position.needsUpdate = true;
   lineGeo.attributes.color.needsUpdate = true;
 
-  // Soft camera follow lerping
+  // Soft camera follow lerping with scroll parallax depth
+  const scrollY = window.scrollY || window.pageYOffset;
   const targetX = mouseX * 0.05;
-  const targetY = -mouseY * 0.05;
+  const targetY = -mouseY * 0.05 - (scrollY * 0.09); // Float background upwards as scrolling down
   camera.position.x += (targetX - camera.position.x) * 0.03;
   camera.position.y += (targetY - camera.position.y) * 0.03;
   camera.lookAt(scene.position);
@@ -959,7 +960,7 @@ function animate() {
   renderer.render(scene, camera);
 }
 
-// ========== Scroll Progress Bar & Scroll Reveal Observation ==========
+// ========== Scroll Progress Bar, Scroll Reveal, and Inertial Scroll ==========
 function initScrollEffects() {
   // 1. Scroll Progress Bar
   const progressBar = document.getElementById("scrollProgress");
@@ -990,6 +991,37 @@ function initScrollEffects() {
   revealElements.forEach(el => {
     revealObserver.observe(el);
   });
+
+  // 3. Inertial Smooth Momentum Wheel Scroll
+  let targetScrollPosition = window.scrollY;
+  let currentScrollPosition = window.scrollY;
+  const scrollSpeedFactor = 0.075;
+
+  window.addEventListener("wheel", (e) => {
+    if (e.ctrlKey) return;
+    e.preventDefault();
+    const delta = e.deltaY;
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    targetScrollPosition = Math.max(0, Math.min(maxScroll, targetScrollPosition + delta));
+  }, { passive: false });
+
+  window.addEventListener("scroll", () => {
+    if (Math.abs(window.scrollY - currentScrollPosition) > 10) {
+      targetScrollPosition = window.scrollY;
+      currentScrollPosition = window.scrollY;
+    }
+  });
+
+  function updateMomentumScroll() {
+    if (Math.abs(targetScrollPosition - currentScrollPosition) > 0.2) {
+      currentScrollPosition += (targetScrollPosition - currentScrollPosition) * scrollSpeedFactor;
+      window.scrollTo(0, currentScrollPosition);
+    } else {
+      currentScrollPosition = targetScrollPosition;
+    }
+    requestAnimationFrame(updateMomentumScroll);
+  }
+  requestAnimationFrame(updateMomentumScroll);
 }
 
 // Initializing the system on window load
