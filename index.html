@@ -1,20 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ApexConvert | Premium Currency Exchange & Rates Comparison</title>
     <!-- Meta tags for SEO -->
-    <meta name="description" content="Convert currencies instantly with real-time exchange rates and compare multiple currencies simultaneously on our modern, glassmorphic dashboard.">
+    <meta name="description"
+        content="Convert currencies instantly with real-time exchange rates and compare multiple currencies simultaneously on our modern, glassmorphic dashboard.">
     <!-- Google Fonts: Outfit (Headings) & Plus Jakarta Sans (Body) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <!-- FontAwesome v6 for premium icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom stylesheet -->
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <!-- 3D WebGL Background Canvas -->
     <canvas id="webgl-bg"></canvas>
@@ -35,7 +40,7 @@
                 <i class="fa-solid fa-rotate"></i>
                 <span>ApexConvert</span>
             </div>
-            
+
             <nav class="nav-menu" id="navMenu">
                 <div class="nav-indicator-pill" id="navIndicatorPill"></div>
                 <a href="#home" class="nav-link active"><i class="fa-solid fa-house"></i>Home</a>
@@ -68,7 +73,8 @@
             <div class="hero-content">
                 <span class="hero-tag">Live Exchange Rates</span>
                 <h1>Supercharge Your <br><span class="gradient-text">Global Transactions</span></h1>
-                <p>Experience lightning-fast currency conversion and compare multi-currency rates side-by-side on our premium interactive dashboard. Powered by real-time market data.</p>
+                <p>Experience lightning-fast currency conversion and compare multi-currency rates side-by-side on our
+                    premium interactive dashboard. Powered by real-time market data.</p>
                 <div class="live-ticker-container">
                     <div class="ticker-card" data-pair="EURUSD">
                         <div class="ticker-pair">
@@ -121,17 +127,19 @@
         <section id="converter" class="section converter-section">
             <div class="container reveal">
                 <h2>Currency Converter</h2>
-                <p class="subtitle">Quickly convert between 160+ world currencies with up-to-the-minute exchange rates.</p>
-                
+                <p class="subtitle">Quickly convert between 160+ world currencies with up-to-the-minute exchange rates.
+                </p>
+
                 <form>
                     <div class="amount">
                         <p>Enter Amount</p>
                         <div class="input-wrapper">
                             <i class="fa-solid fa-money-bill-wave input-icon"></i>
-                            <input type="number" value="100" min="1" step="any" placeholder="0.00" aria-label="Amount to convert">
+                            <input type="number" value="100" min="1" step="any" placeholder="0.00"
+                                aria-label="Amount to convert">
                         </div>
                     </div>
-                    
+
                     <div class="dropdown">
                         <div class="from">
                             <p>From</p>
@@ -144,7 +152,8 @@
                                 <div class="custom-select-menu">
                                     <div class="search-wrapper">
                                         <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                                        <input type="text" class="search-input" placeholder="Search currency..." autocomplete="off">
+                                        <input type="text" class="search-input" placeholder="Search currency..."
+                                            autocomplete="off">
                                     </div>
                                     <div class="options-wrapper">
                                         <!-- populated dynamically by JS -->
@@ -153,11 +162,12 @@
                                 <select name="from" aria-label="From currency" style="display: none;"></select>
                             </div>
                         </div>
-                        
+
                         <div class="swap-wrapper">
-                            <i class="fa-solid fa-arrow-right-arrow-left swap-icon" id="swapBtn" title="Swap currencies"></i>
+                            <i class="fa-solid fa-arrow-right-arrow-left swap-icon" id="swapBtn"
+                                title="Swap currencies"></i>
                         </div>
-                        
+
                         <div class="to">
                             <p>To</p>
                             <div class="custom-select-container" id="toCustomSelect">
@@ -169,7 +179,8 @@
                                 <div class="custom-select-menu">
                                     <div class="search-wrapper">
                                         <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                                        <input type="text" class="search-input" placeholder="Search currency..." autocomplete="off">
+                                        <input type="text" class="search-input" placeholder="Search currency..."
+                                            autocomplete="off">
                                     </div>
                                     <div class="options-wrapper">
                                         <!-- populated dynamically by JS -->
@@ -179,12 +190,13 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="msg-container">
                         <div class="msg">1 USD = 83.50 INR</div>
-                        <div class="rate-status" id="rateStatus"><i class="fa-solid fa-circle-check"></i> Live Rates</div>
+                        <div class="rate-status" id="rateStatus"><i class="fa-solid fa-circle-check"></i> Live Rates
+                        </div>
                     </div>
-                    
+
                     <button type="submit">
                         <span>Get Exchange Rate</span>
                         <i class="fa-solid fa-arrow-right"></i>
@@ -207,7 +219,8 @@
             <div class="trend-container reveal" id="trendContainer">
                 <div class="trend-header">
                     <div class="trend-title-area">
-                        <h3><i class="fa-solid fa-chart-line"></i> <span id="trendTitle">USD to INR Rate Trend</span></h3>
+                        <h3><i class="fa-solid fa-chart-line"></i> <span id="trendTitle">USD to INR Rate Trend</span>
+                        </h3>
                         <p class="trend-subtitle">Historical market performance over the selected timeframe</p>
                     </div>
                     <div class="timeframe-selector">
@@ -244,19 +257,25 @@
                                 <stop offset="100%" stop-color="var(--chart-area-end)" stop-opacity="0.0" />
                             </linearGradient>
                         </defs>
-                        
+
                         <!-- Chart Grid Lines (Dynamically drawn) -->
                         <g id="chartGrid"></g>
-                        
+
                         <!-- Filled Gradient Area -->
                         <path id="chartArea" d="" fill="url(#chart-area-grad)"></path>
-                        
+
                         <!-- Glowing Line -->
-                        <path id="chartLine" d="" fill="none" stroke="url(#chart-line-grad)" stroke-width="4.5" filter="url(#chart-glow)"></path>
-                        
+                        <path id="chartLine" d="" fill="none" stroke="url(#chart-line-grad)" stroke-width="4.5"
+                            filter="url(#chart-glow)"></path>
+
                         <!-- Hover Tracker -->
-                        <line id="chartTrackerLine" x1="0" y1="0" x2="0" y2="220" stroke="var(--primary)" stroke-width="1.5" stroke-dasharray="4 4" style="opacity: 0; pointer-events: none; transition: opacity var(--transition-fast);"></line>
-                        <circle id="chartTrackerDot" r="6" fill="var(--primary)" stroke="#ffffff" stroke-width="2" style="opacity: 0; pointer-events: none; transition: opacity var(--transition-fast); filter: drop-shadow(0 0 5px var(--primary));"></circle>
+                        <line id="chartTrackerLine" x1="0" y1="0" x2="0" y2="220" stroke="var(--primary)"
+                            stroke-width="1.5" stroke-dasharray="4 4"
+                            style="opacity: 0; pointer-events: none; transition: opacity var(--transition-fast);">
+                        </line>
+                        <circle id="chartTrackerDot" r="6" fill="var(--primary)" stroke="#ffffff" stroke-width="2"
+                            style="opacity: 0; pointer-events: none; transition: opacity var(--transition-fast); filter: drop-shadow(0 0 5px var(--primary));">
+                        </circle>
                     </svg>
 
                     <!-- Overlaid HTML Axes for CSS Scaling -->
@@ -267,19 +286,23 @@
                 <!-- Financial Performance Stats -->
                 <div class="trend-stats">
                     <div class="stat-card">
-                        <span class="stat-label"><i class="fa-solid fa-circle-chevron-up" style="color: var(--accent); margin-right: 4px;"></i> Highest</span>
+                        <span class="stat-label"><i class="fa-solid fa-circle-chevron-up"
+                                style="color: var(--accent); margin-right: 4px;"></i> Highest</span>
                         <span class="stat-value" id="statHigh">--</span>
                     </div>
                     <div class="stat-card">
-                        <span class="stat-label"><i class="fa-solid fa-circle-chevron-down" style="color: #ef4444; margin-right: 4px;"></i> Lowest</span>
+                        <span class="stat-label"><i class="fa-solid fa-circle-chevron-down"
+                                style="color: #ef4444; margin-right: 4px;"></i> Lowest</span>
                         <span class="stat-value" id="statLow">--</span>
                     </div>
                     <div class="stat-card">
-                        <span class="stat-label"><i class="fa-solid fa-scale-balanced" style="color: var(--primary); margin-right: 4px;"></i> Average</span>
+                        <span class="stat-label"><i class="fa-solid fa-scale-balanced"
+                                style="color: var(--primary); margin-right: 4px;"></i> Average</span>
                         <span class="stat-value" id="statAvg">--</span>
                     </div>
                     <div class="stat-card">
-                        <span class="stat-label"><i class="fa-solid fa-arrows-spin" style="color: #c084fc; margin-right: 4px;"></i> 30-Day Change</span>
+                        <span class="stat-label"><i class="fa-solid fa-arrows-spin"
+                                style="color: #c084fc; margin-right: 4px;"></i> 30-Day Change</span>
                         <span class="stat-value" id="statTrend">--</span>
                     </div>
                 </div>
@@ -291,7 +314,7 @@
             <div class="comparison-container reveal">
                 <h2>Multi-Currency Comparison</h2>
                 <p class="subtitle">Compare a base currency amount with up to 12 popular currencies in real-time.</p>
-                
+
                 <div class="comparison-controls">
                     <div class="base-currency-selector">
                         <label for="baseCurrency">Base Currency</label>
@@ -304,7 +327,8 @@
                             <div class="custom-select-menu">
                                 <div class="search-wrapper">
                                     <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                                    <input type="text" class="search-input" placeholder="Search currency..." autocomplete="off">
+                                    <input type="text" class="search-input" placeholder="Search currency..."
+                                        autocomplete="off">
                                 </div>
                                 <div class="options-wrapper">
                                     <!-- populated dynamically by JS -->
@@ -313,28 +337,29 @@
                             <select id="baseCurrency" style="display: none;"></select>
                         </div>
                     </div>
-                    
+
                     <div class="amount-input">
                         <label for="comparisonAmount">Compare Amount</label>
                         <div class="input-wrapper">
                             <i class="fa-solid fa-wallet input-icon"></i>
-                            <input type="number" id="comparisonAmount" value="100" min="1" step="any" placeholder="0.00">
+                            <input type="number" id="comparisonAmount" value="100" min="1" step="any"
+                                placeholder="0.00">
                         </div>
                     </div>
-                    
+
                     <button class="compare-btn" id="compareBtn">
                         <i class="fa-solid fa-chart-simple"></i>
-                        <span>Compare Rates</span>
+                        <span>Compare Rates Now</span>
                     </button>
                 </div>
-                
+
                 <div class="currency-selector-grid">
                     <h3>Select Currencies to Compare</h3>
                     <div class="currency-chips" id="currencyChips">
                         <!-- Populated by JavaScript -->
                     </div>
                 </div>
-                
+
                 <div class="comparison-results" id="comparisonResults">
                     <div class="results-grid" id="resultsGrid">
                         <!-- Comparison cards populated by JavaScript -->
@@ -349,14 +374,15 @@
         <div class="footer-content reveal">
             <div class="footer-section">
                 <h3><i class="fa-solid fa-rotate"></i> ApexConvert</h3>
-                <p>ApexConvert is a state-of-the-art currency conversion platform offering lightning-fast exchanges and multi-currency analysis using reliable real-time rates.</p>
+                <p>ApexConvert is a state-of-the-art currency conversion platform offering lightning-fast exchanges and
+                    multi-currency analysis using reliable real-time rates.</p>
                 <div class="social-links">
                     <a href="#" aria-label="Twitter"><i class="fa-brands fa-twitter"></i></a>
                     <a href="#" aria-label="Github"><i class="fa-brands fa-github"></i></a>
                     <a href="#" aria-label="Linkedin"><i class="fa-brands fa-linkedin-in"></i></a>
                 </div>
             </div>
-            
+
             <div class="footer-section">
                 <h4>Quick Links</h4>
                 <ul>
@@ -366,16 +392,18 @@
                     <li><a href="#about"><i class="fa-solid fa-angle-right"></i> About Us</a></li>
                 </ul>
             </div>
-            
+
             <div class="footer-section">
                 <h4>Data Source</h4>
-                <p>Rates are fetched in real-time from professional financial sources. Please note that data is for informational purposes only and not for trading.</p>
+                <p>Rates are fetched in real-time from professional financial sources. Please note that data is for
+                    informational purposes only and not for trading.</p>
                 <div class="api-credit">
-                    Rates powered by <a href="https://www.exchangerate-api.com" target="_blank" rel="noopener">ExchangeRate-API</a>
+                    Rates powered by <a href="https://www.exchangerate-api.com" target="_blank"
+                        rel="noopener">ExchangeRate-API</a>
                 </div>
             </div>
         </div>
-        
+
         <div class="footer-bottom">
             <p>&copy; 2026 ApexConvert. All rights reserved.</p>
             <p>Made with <i class="fa-solid fa-heart"></i> for a beautiful web experience.</p>
@@ -390,4 +418,5 @@
     <script src="codes.js"></script>
     <script src="app.js"></script>
 </body>
+
 </html>
