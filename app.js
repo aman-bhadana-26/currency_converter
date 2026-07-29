@@ -992,36 +992,6 @@ function initScrollEffects() {
     revealObserver.observe(el);
   });
 
-  // 3. Inertial Smooth Momentum Wheel Scroll
-  let targetScrollPosition = window.scrollY;
-  let currentScrollPosition = window.scrollY;
-  const scrollSpeedFactor = 0.075;
-
-  window.addEventListener("wheel", (e) => {
-    if (e.ctrlKey) return;
-    e.preventDefault();
-    const delta = e.deltaY;
-    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-    targetScrollPosition = Math.max(0, Math.min(maxScroll, targetScrollPosition + delta));
-  }, { passive: false });
-
-  window.addEventListener("scroll", () => {
-    if (Math.abs(window.scrollY - currentScrollPosition) > 10) {
-      targetScrollPosition = window.scrollY;
-      currentScrollPosition = window.scrollY;
-    }
-  });
-
-  function updateMomentumScroll() {
-    if (Math.abs(targetScrollPosition - currentScrollPosition) > 0.2) {
-      currentScrollPosition += (targetScrollPosition - currentScrollPosition) * scrollSpeedFactor;
-      window.scrollTo(0, currentScrollPosition);
-    } else {
-      currentScrollPosition = targetScrollPosition;
-    }
-    requestAnimationFrame(updateMomentumScroll);
-  }
-  requestAnimationFrame(updateMomentumScroll);
 }
 
 // Initializing the system on window load
