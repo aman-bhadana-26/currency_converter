@@ -492,10 +492,10 @@ body.dark-theme .nav-indicator-pill::after {
 /* Ripple Element Styling */
 .nav-ripple {
   position: absolute;
-  border-radius: 50%;
+  border-radius: 55%;
   background: rgba(99, 102, 241, 0.25);
   transform: scale(0);
-  animation: navRippleAnim 0.5s cubic-bezier(0.1, 0.8, 0.3, 1) both;
+  animation: navRippleAnim 0.5s cubic-bezier(0.1, 0.9, 0.3, 1) both;
   pointer-events: none;
   z-index: 0;
 }
