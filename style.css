@@ -639,7 +639,7 @@ body.dark-theme .theme-toggle {
 }
 
 .theme-toggle i {
-  font-size: 1.15rem;
+  font-size: 1.16rem;
   color: #f59e0b;
   transition: transform var(--transition-normal), color var(--transition-normal);
   z-index: 2;
