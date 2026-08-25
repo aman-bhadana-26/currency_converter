@@ -680,7 +680,7 @@ body.dark-theme .theme-toggle i {
   border: 1px solid rgba(16, 185, 129, 0.18);
   border-radius: 100px;
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 701;
   color: var(--accent);
   letter-spacing: 0.75px;
   box-shadow: 0 2px 10px rgba(16, 185, 129, 0.05),
