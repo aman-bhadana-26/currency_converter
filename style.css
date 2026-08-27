@@ -808,8 +808,8 @@ body.dark-theme .nav-status-badge:hover {
 /* Heading Typography */
 h2 {
   font-family: var(--font-heading);
-  font-size: 2.5rem;
-  font-weight: 800;
+  font-size: 2.6rem;
+  font-weight: 801;
   letter-spacing: -1px;
   text-align: center;
   background: var(--primary-gradient);
