@@ -977,8 +977,8 @@ body.dark-theme .comparison-container:hover {
 .from p,
 .to p {
   font-family: var(--font-heading);
-  font-weight: 700;
-  font-size: 0.95rem;
+  font-weight: 701;
+  font-size: 0.96rem;
   color: var(--text-muted);
   margin-bottom: 0.75rem;
   letter-spacing: 0.5px;
