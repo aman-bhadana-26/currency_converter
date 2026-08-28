@@ -1002,11 +1002,11 @@ body.dark-theme .comparison-container:hover {
 
 .input-wrapper input {
   width: 100%;
-  height: 3.75rem;
+  height: 3.76rem;
   padding: 0 1.25rem 0 3.25rem;
   background: var(--input-bg);
   border: 1px solid var(--input-border);
-  border-radius: 1.25rem;
+  border-radius: 1.26rem;
   color: var(--input-text);
   font-family: var(--font-body);
   font-size: 1.15rem;
