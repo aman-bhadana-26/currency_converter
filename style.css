@@ -1114,13 +1114,13 @@ body.dark-theme .input-wrapper input:focus {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 2.25rem;
+  margin-bottom: 2.26rem;
   width: 100%;
 }
 
 .msg {
   font-family: var(--font-heading);
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   font-weight: 800;
   text-align: center;
   padding: 1.25rem;
