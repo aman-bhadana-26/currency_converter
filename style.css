@@ -1126,10 +1126,10 @@ body.dark-theme .input-wrapper input:focus {
   padding: 1.25rem;
   border-radius: 1.25rem;
   background: rgba(99, 102, 241, 0.05);
-  border: 1px dashed rgba(99, 102, 241, 0.2);
+  border: 1px dashed rgba(99, 102, 241, 0.1);
   margin-bottom: 0.5rem;
   color: var(--primary);
-  letter-spacing: -0.2px;
+  letter-spacing: -0.3px;
   width: 100%;
 }
 
